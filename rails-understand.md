@@ -1277,7 +1277,8 @@ for verifying the operation was successful.
 
 Notice the title says "destroy records" and not "delete records". There is a 
 `delete` method bypasses some Rails features and will not behaive as you expect 
-so it's better to use the `destroy` method. After you run find:  
+so it's better to use the `destroy` method. THe `delete` method will leave you 
+with an "orphaned row" and `destroy` will not. After you run find:  
 
 	> teacher.destroy # runs DELETE on actual database only
 		=> you'll see a "frozen hash" here
@@ -2127,5 +2128,75 @@ for this reason, you might want to do everything via an object from the JOIN
 when creating a record and then you can use the way possible with `:through` 
 for modifying existing records. 
 
-## CRUD with Models in the Controllers
+## CRUD with Controller Actions and Views
 
+
+A lot of what we have done so far in the __rails console__ actually belongs 
+in the controllers where the views can interact with them. 
+
+### CRUD Naming Conventions in Rails  
+
+If you keep to the naming conventions with your controller and action names, 
+Rails will generate logical sounding URLs that map to their purpose and the 
+object of their manipulations. 
+
+__Action names and CRUD__  
+
+Remember that the methods in Rails controllers are called "actions" and each 
+usually corresponds to a view. Many of the view's purposes have something to 
+do with the database: one might display a list of students or courses, one 
+might allow a student to sign of for a course and another might allow the 
+schools to create or delete a course from their curriculum.  
+
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/crud_actions.png)
+
+In terms of what actually happens on the web, the __"HTTP Verb"__ are the 
+only thing that actually exists. They keywords that are actually part of the 
+HTTP response and request messages. The actions are, of course, the names of 
+the methods in the Rails controller classes. THe CRUD operations are really 
+just abstract catergories for the HTTP Verbs and the Rails actions basically 
+add views, which are GET requests, to each of the CRUD operations. In this way: 
+
+CRUD __create__ == HTTP __POST__ == Rails __create__  
+CRUD __read__ == HTTP __GET__ == Rails __show__   
+CRUD __update__ == HTTP __PUT__ or __PATCH__ == Rails __update__    
+CRUD __delete__ == HTTP __DELETE__ == Rails __destroy__  
+
+They only odd one here is that we have `destroy` where we expected `delete`.  
+`delete` is actually used to display the delete form, a view/GET. This is 
+because ActiveRecord has a `delete` method and a `destroy` method but, as was 
+pointed out earlier, `delete` has issues and `destroy` is preferred. The action 
+name `destroy` is meant to match this ActiveRecord method. In practice, you won't 
+see the Rails `delete` action very often and if you do, it will be for form 
+display (GET) purposees and not for the calling of `delete`. 
+ 
+All of the CRUD operations have a corresponding Rails action that is GET request.   
+
+Rails adds the GET action/view __new__ for CRUD __create__  
+Rails adds the GET action/view __index__ for CRUD __read__  
+Rails adds the GET action/view __edit__ for CRUD __update__    
+Rails adds the GET action/view __delete__ for CRUD __delete__   
+
+All of these are meant to display a form before modification takes place, with 
+the excpetions of CRUD "__read__", which is already a GET request so Rails 
+breaks it down in to the actions __index__ to show all records and __show__ to 
+show a single one. 
+
+A frequent practice is to place the standard CRUD actions in each controller 
+in the following order: `index`, `show`, `new`, `edit`, `create`, `update` 
+and `destroy` (omitting `delete`). You don't have to follow this order but since 
+they are public methods they must be placed before private or protected method 
+in the controller in order to work. 
+
+__Controller names and CRUD__  
+
+Where action names roughly map out to CRUD operations and Rails ActiveRecord 
+names, controller names should refer to the database model names they work on.  
+They should be __PLURAL__ and will often be one model per controller:    
+
+> `ClassroomsController TeachersController CoursesController StudentsController`
+
+
+ 
+ 
+ 
