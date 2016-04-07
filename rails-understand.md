@@ -2196,7 +2196,107 @@ They should be __PLURAL__ and will often be one model per controller:
 
 > `ClassroomsController TeachersController CoursesController StudentsController`
 
+### Generating Controller/Actions/Views for CRUD
 
+Probably the prefered way to get started is to use the generate command and list 
+the actions desired. Let's make a controller for the Classroom model:  
+
+	$ rails generate controller Classrooms index show new edit create destroy
+	
+Notice we didn't type `ClassroomsController` even though that is what results. 
+Also notice the order of the actions. There is in recent Rails a shortcut to 
+generate this but it will often give you more than you need:  
+
+	$ rails g scaffold_controller Classrooms 
+	
+`scaffold_controller`, in this case, will generate the following, only with more 
+whitespace which was deleted for this guide:    
+
+	class ClassroomsController < ApplicationController
+	  before_action :set_classroom, only: [:show, :edit, :update, :destroy]
+	
+	  # GET /classrooms
+	  # GET /classrooms.json
+	  def index
+	    @classrooms = Classroom.all
+	  end
+	
+	  # GET /classrooms/1
+	  # GET /classrooms/1.json
+	  def show
+	  end
+	
+	  # GET /classrooms/new
+	  def new
+	    @classroom = Classroom.new
+	  end
+	
+	  # GET /classrooms/1/edit
+	  def edit
+	  end
+	
+	  # POST /classrooms
+	  # POST /classrooms.json
+	  def create
+	    @classroom = Classroom.new(classroom_params)
+	
+	    respond_to do |format|
+	      if @classroom.save
+	        format.html { redirect_to @classroom, notice: 'Classroom was successfully created.' }
+	        format.json { render :show, status: :created, location: @classroom }
+	      else
+	        format.html { render :new }
+	        format.json { render json: @classroom.errors, status: :unprocessable_entity }
+	      end
+	    end
+	  end
+	
+	  # PATCH/PUT /classrooms/1
+	  # PATCH/PUT /classrooms/1.json
+	  def update
+	    respond_to do |format|
+	      if @classroom.update(classroom_params)
+	        format.html { redirect_to @classroom, notice: 'Classroom was successfully updated.' }
+	        format.json { render :show, status: :ok, location: @classroom }
+	      else
+	        format.html { render :edit }
+	        format.json { render json: @classroom.errors, status: :unprocessable_entity }
+	      end
+	    end
+	  end
+	
+	  # DELETE /classrooms/1
+	  # DELETE /classrooms/1.json
+	  def destroy
+	    @classroom.destroy
+	    respond_to do |format|
+	      format.html { redirect_to classrooms_url, notice: 'Classroom was successfully destroyed.' }
+	      format.json { head :no_content }
+	    end
+	  end
+	
+	  private
+	    # Use callbacks to share common setup or constraints between actions.
+	    def set_classroom
+	      @classroom = Classroom.find(params[:id])
+	    end
+	
+	    # Never trust parameters from the scary internet, only allow the white list through.
+	    def classroom_params
+	      params.fetch(:classroom, {})
+	    end
+	end
+ 
+ There is a lot in this code that might be foreign to you at this point but the 
+ important takaways are: the order of the actions here follows Rails convention, 
+ the extensive use of `@instance` variables is common for CRUD in the controllers, 
+ and the tests `if @classroom.save` and `if @classroom.update(classroom_params)` 
+ are used for error handling. Let's cut this file down by deleting the `private` 
+ methods, making the remaining methods be empty and deleting 
+ `before_action :set_classroom, only: [:show, :edit, :update, :destroy]`.  
+ 
+ 
+ 
  
  
  
