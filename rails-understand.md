@@ -24,7 +24,7 @@ but the view only calls back to the server.Not only that, the view is the ONLY
 component to call back to the server, which then serves back the response to the 
 client browser
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/rails_structure.png)
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/rails_structure.png)
 
 If you drop and html file in public, it will be available if typed after `/` 
 in the url. Some web servers let you skip the `.html` extension in the path. 
@@ -41,7 +41,7 @@ To give you an idea of how rails passes around resposibility, focus on the three
 parts: `routes.rb`, the `controllers` folder and the `views` folder. Ignore models 
 and the database for now:
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/rails_file_structure_neg.png)
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/rails_file_structure_neg.png)
 
 Note that the parenthesis are just there to show "this is where that name would be 
 inserted in the file or directory name."
@@ -1006,7 +1006,7 @@ classroom and each classroom has only one teacher. Both the classroom and it's
 teacher have many courses it teaches. Students freely pass between different 
 classrooms taking different courses but teachers stay in their respective rooms.  
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/db_associations.png)  
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_associations.png)  
 
 Obvously this is not showing the full school, there are more than one classroom 
 and many teachers, but this encapsulates the details of the relationships, or 
@@ -1523,7 +1523,7 @@ There are three main __types of data model relationships__:
 	<br><br>
 * __Many-to-many__, abbrevated as __m:m__   
 example: __students\<JOIN\>courses__
-	* a course `has_and_belongs_to_many :students`
+	* a course `  :students`
 	* a student `has_and_belongs_to_many :courses`
 	* this must be a __JOIN__ since we have two foreign keys 
 
@@ -1670,7 +1670,6 @@ To destroy the record and remove the association to it:
 After `classroom.teacher.destroy` if you then run `classroom.teacher` it still 
 shows it the teacher object, but in frozen state. The frozen state does not last 
 forever though. If you search for classroom again it will be gone.  
-
 §
 
 --------------------------------------------------------------------------------
@@ -1781,13 +1780,12 @@ will apply to `associated_record`, not `record`.
 	first_teacher.courses.where(name: chemistry)
 
 This would show the data for the chemestry class if we hadn't deleted it.  
-
 §
 
 --------------------------------------------------------------------------------
 ## Many-to-Many with Model-less Joins
 
-In the case of Many\_to\_many, it's far too complicated to have foreign keys 
+In the case of Many-to-many, it's far too complicated to have foreign keys 
 on each of the two tables for the same reasons we saw the `has_many` table not 
 being the suitable table to hold foreign keys, only now the issue has grown to 
 BOTH tables with `has_many`. For this reason we bring in a third table to handle 
@@ -1795,7 +1793,7 @@ all the relationships. This third table is called __JOIN table__ which will
 store the __two foreign keys required for each Many-to-many relationship__. 
 Let's refer back to the chart of our school example's associations:  
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/db_join.png)  
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join.png)  
 
 That mess of connections is now encapsulated in another green box. This is 
 called a "join table" in relational database terminology and in fact __JOIN__ 
@@ -1879,7 +1877,7 @@ For this exercise you should have two courses and two students added to your
 database. You would do this the same way as you would with any other table 
 with a Rails model. Also have the four records queried and saved to objects. 
 the following assumes you have the four named as `course1`, `course2`, 
-`student1`, and `student2`, 
+`student1`, and `student2`: 
 
 	$ rails console
 	> course1.students << student1
@@ -1902,14 +1900,17 @@ relating to both records in relation to each other.
 
 For this we need to restructure our Rails association methods. Before we had this:
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/db_join_model-less.png)  
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join_model-less.png)  
 
 Notice there is no Model defined in our code for the join table. Now we will 
 actually define one with a different, more suitable name and give it two 
 association methods. We will also change the associations in the other two 
 models:  
 
-![missing image](https://s3.amazonaws.com/jeffruss/img/db_join_with_model.png)  
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join_with_model.png)  
+
+Be aware that there is a better way to do this but for the sake of learning we 
+will use the above association methods.  
 
 __Keys in Join Models__
 
@@ -1932,4 +1933,199 @@ Also, __now that our join has a defined model, we need to have the two__
 __associated models it joins point to the join rather than each other.__  
 
 ### Updating our Example with a Join Model 
+
+First let's drop the join table we have now:
+
+	$ rails g migration DropCoursesStudentsJoin
+
+Now rename the class and make `change` look like: 
+
+	class DropCoursesStudents < ActiveRecord::Migration
+	  def change
+	    drop_table :courses_students
+	  end
+	end
+
+You can run `rake db:migrate` now or wait until we have this new addition:  
+
+	rails g model Enrollment
+
+Since we need both a model and migration we ran `rails g model`, which also 
+makes the migration. Also, remember that models are singular and migration 
+are plural. Running this created a `CreateEnrollments` migration, plural:  
+
+	class CreateEnrollments < ActiveRecord::Migration
+	  def change
+	    create_table :enrollments do |t|
+	    
+	      t.timestamps
+	    end
+	  end
+	end
+
+Let's add the two foreign keys and one index for both of them:  
+
+	class CreateEnrollments < ActiveRecord::Migration
+	  def change
+	    create_table :enrollments do |t|
+	      t.references :course
+	      t.references :student
+	      
+	      t.timestamps
+	    end
+	    add_index :enrollments, ["course_id", "student_id "]
+	  end
+	end
+
+A couple of things to note: unlike the model-less join, we do not need to 
+add `id: false`. We need a primary key so we'll let the default take over. 
+Also note that, since we used `t.references` instead of `t.integer`, we can 
+leave off the `_id` at the end. We used an array to handle the two foreign 
+keys at once.  
+
+At this point we don't have any functionality that we lacked in the 
+model-less join. Let's add the student's grade in the course, right before 
+`timestamps`:   
+
+	t.decimal :grade, precision: 5, scale: 2
+
+We used `decimal` because it has fixed precision and is not floating point. 
+`:scale` determines the number of digits after the decimal point and 
+`:precision` determins the total number of digits. Now let's add something 
+to show if the course is an elective or required:  
+
+	t.boolean :elective, default: false
+
+Now we can run `rake db:migrate` and move on to defining the model files which are empty classes at the moment. Add the following:  
+
+>`Course` model class `has_many :enrollments`   
+>`Student` model class `has_many :enrollments` 
+>`Enrollment` model class `belongs_to :courses`
+>`Enrollment` also should `belongs_to :students`
+
+
+Remember that there is a better way to do this but for the sake of learning we 
+will use the above association methods.  
+
+__REVIST DEFAULT OVERRIDES__  
+
+Note that at this point, no SQL JOIN clause has been run. We simply have a 
+table with two id's and an index.   
+
+__Associating Specific Records__
+
+For this exercise you should have two courses and two students added to your 
+database. You would do this the same way as you would with any other table 
+with a Rails model. We have to handle the joins differently now that we have 
+a model for the join table. Let's say a student visits the registrar and says 
+he needs and elective. The student is looked up and `student1` is made. The 
+desired course is looked up and `course1` is made, then:  
+
+	$ rails console
+	> student1.enrollments  # shows no courses. same for student2
+	> course1.enrollments   # show no students. same for course2
+	 
+Next we open up a new enrollment object (the join) and set it to elective.  
+Since it has a model, we need to work with this join object. After we set it 
+to elective we will add it to the course
+
+	> enroll = Enrollment.new
+	  => # you'll see keys but all nil
+	> enroll.elective = true    
+	> course1.enrollments << enroll
+	
+`<<` will automatically save the `course1` record. If we used the `=` 
+assignment operator we would need to run `.new` on it to save it. Now we 
+have `course1` with an unknown student as an elective. We could do this:  
+
+	> course1.enrollments << student1
+
+But let's do it this way: 
+
+	> enroll.enrollments = student1 
+	> enroll.save
+	
+__GOTCHA:__ You might thinks all is well since you ran `.save` but it's not.  
+If you look at `course1.enrollments` you'll see that the student was added BUT 
+if you look at `student1.enrollments` you won't see the course added! We need 
+to reload `student1` from the database:  
+
+	> student1.enrollments(true)
+	> student1.enrollments 
+      => # now you'll see it!
+
+This reveals that `.save` only saved to the database but did not update our 
+instantiated `student1` object. If we use `<<` on the JOIN table object it will 
+save in both places. __BEWARE OF THIS__ since it leaves you with an out of sync 
+object.  
+
+__Using Mass Assignment__
+
+Another to to associate two records that have a modeled join is to simply do 
+it all with mass assignment to the join object. You'll still need to have 
+student and course objects ready to go but this way is ultimately much quicker:  
+
+	> Enrollment.create(student: student2, course: course2, elective: true)
+
+__BEWARE OF THIS__ too since it also updates the database but not the object. 
+We need to run this:  
+
+	> student2.enrollments(true)
+	> course2.enrollments(true)
+	
+Now the objects are updated to the new state of the database.  
+
+### Traversing our Example with a Join Model
+
+Before if we wanted to get a student's associated course data we could run 
+`a_course.students` and get an array. We can't do that now since courses has 
+no direct relationship with students and visa-versa. They instead both have a 
+relationship with `enrollments` and we must go to this join to get the 
+other table's associated data like this:  
+
+	a_student.enrollments.map { |e| e.students } 
+	
+This goes through each enrollment to look up it's students and returns the 
+same array. This is not only more of a pain, it's also results in not very 
+efficient SQL. We want to be able to simple call `a_course.students` and have 
+it __traverse__ the join. To do this, we must tell ActiveRecord about this 
+outer relationship between courses and students. Do to this we use the 
+`:through` hash with our `has_many` declarations.  
+
+### INNER JOIN: __has_many__ with __:through__
+
+The solution is to add to a second relation to each of our two outer models
+which using `through` which has similar effect as `has_and_belongs_to_many`. 
+
+>`Course` model class `has_many :enrollments`  
+>`Course` model class `has_many :students, through: :enrollments`  
+> 
+>`Student` model class `has_many :enrollments`  
+>`Student` model class `has_many :courses, through: :enrollments`
+
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join_with_through.png)
+
+Basically what these do is say "we have a relatinship with students/courses 
+that you can find out about if you look at the enrollments table." 
+
+__REVIST DEFAULT OVERRIDES__  
+
+Now if you go to console and query a student or course you will see the SQL 
+has added an __"INNER JOIN."__ Now the following are available:  
+
+	> student1.courses
+		=> # shows course data
+	> course1.students
+		=> # shows student data
+		
+and show the other tables data by __"traversing the INNER JOIN."__ This is 
+easier and more efficient but be aware that it's __not exactly the same as__
+__a direct assocation in some cases.__ We can use `<<` to add students and 
+courses to each other but __if the INNNER JOIN has required fields we can't__ 
+__sucessfully save the record without adding to  the JOIN directly.__ 
+for this reason, you might want to do everything via an object from the JOIN 
+when creating a record and then you can use the way possible with `:through` 
+for modifying existing records. 
+
+## CRUD with Models in the Controllers
 
