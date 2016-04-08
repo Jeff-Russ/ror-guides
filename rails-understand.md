@@ -181,7 +181,7 @@ is available.
 
 __Default Route__  
 
-The Simple route handles a single, explicitly define string url but often we want 
+The Simple route handles a single, explicitly defined string url but often we want 
 to target a number of requests without naming them all individually. 
 
 Such is the case with Default Routes. A default route follows the form:
@@ -498,6 +498,18 @@ The migration files are ordered by data created since often new features depend 
 old ones. Migrations also make it easy for multiple developers (who of course 
 have their own local versions of the database in their respective production 
 environments) to coordinate changes and revert them, if needed.  
+
+__One important note on migration files:__ the migration filenames are prepended 
+with a timestamp and when you set up or update your database, all migration file 
+that have not be run will be run __IN ORDER.__ If you make a migration to create 
+a model, share it to fellow developers and then decide to modify the model you 
+__should NOT modify old migration files but instead, make a new one that modifies!__  
+Imaging other developers made migrations to modify what you did in the "create" 
+migration. This will be run after yours. If you modify your original by, for example 
+renaming some field, the other user's migration could have references to things 
+that should exist if you left your migration alone, but now don't. So the rule is:   
+
+__Once you run your migrations, don't modify old migration files, make new ones!__  
 
 To sumarize, __migrations__ define the methods executed and repeated to set up 
 your database's schema. Their effect on the database are _reversable_. They keep 
@@ -1090,9 +1102,9 @@ __names are plural!__ and, since this is the first time dealing with
 the classrooms table, Rails knows we are creating it and prepends the class 
 name with `Create`.  
 
-	class CreateTeachers < ActiveRecord::Migration
+	class CreateClassrooms < ActiveRecord::Migration
 	  def change
-	    create_table( :teachers ) do |t|
+	    create_table( :classrooms ) do |t|
 	
 	      t.timestamps  # you see instead: `t.timestamps null: false`
 	    end
@@ -1147,11 +1159,10 @@ needed to create a column!
 No let's move on to the __teachers__ table, where we we'll keep it simple and
 just use `change`: 
 
-
 	class CreateTeachers < ActiveRecord::Migration
 	  def change
 	    create_table( :teachers ) do |t|
-	      t.integer "classroom_id"  # same as: t.references :classroom
+	      t.integer "classroom_id" 
 	      t.string "first_name"
 	      t.string "last_name"
 	      
@@ -1161,42 +1172,106 @@ just use `change`:
 	  end
 	end
 	
-The adding the foreign key is done in the `create_table` block. There are two 
-acceptable syntaxes for this as you can see in the comment. Remember that __All__ 
-__foreign keys also need an index__ so you can see that being creating, again, 
-outside the call to `create_table`.  
+The adding the foreign key is done in the `create_table` block. Remember that 
+__All foreign keys also need an index__ so you can see that being creating  
+outside the call to `create_table`. Before you run the migration, let's delete 
+this and create it another way, completely with `rails generate`:  
+
+	$ rails destroy model Teacher
+	$ rails g model Teacher classroom_id:integer:index first_name:string last_name:string
+
+
+The synax for this is `column_name:type column_name:type,` etc. 
+`classroom_id:integer:index ` creates two lines of code: `t.integer "classroom_id"`
+and `add_index("teachers", "classroom_id")`.
+
+__IMPORTANT:__ Notice that there are no commas. If you put commas, you will not 
+get an error but commas will be inserted into the actual migration file and 
+you will get an error when you finally run the migration!  
+
+Note that this quicker way does not allow you to set a default modifier like 
+we had with `t.boolean "lab_equip", default: false`. There are, however some 
+accepted modifiers in the generate command. It's a bit advanced for now but 
+you can look up "passing modifiers to rails generate" if you're interested.    
+
+Do this to run the migration and see what the results are in the database:  
+
+	$ rake db:migrate
+	$ rails console
+	> ActiveRecord::Base.connection.tables # this is to display all tables
+	 => ["schema_migrations", "classrooms", "teachers"]  
+	> Teacher.column_names # this shows the columns for the teachers table
+	 => ["id", "classroom_id", "first_name", "last_name", "created_at", "updated_at"]
+	 
+Note that this shows the foreign key `classroom_id` but not the index for it.  
+In other words, It does not prove we have an index for `teacher_id` and would  
+look exactly the same if we didn't have `add_index("teachers", "classroom_id")` 
+in our migration file. 
+
+	> Teacher.connection.index_exists? :teachers, :classroom_id
+	   (0.3ms)              SELECT sql
+	            FROM sqlite_master
+	            WHERE name='index_teachers_on_classroom_id' AND type='index'
+	            UNION ALL
+	            SELECT sql
+	            FROM sqlite_temp_master
+	            WHERE name='index_teachers_on_classroom_id' AND type='index'
+	
+	 => true 
+
+`index_exists?` method on one of the ActiveRecord "connection adapters" classes. 
+It takes two symbol arguments, the table name and the index name. It runs SQL
+and then returns `true` if there is an index for it on that table. 
+
+__t.references__  
+
+There is another, newer syntax for creating a foreign key and giving it an 
+index. The older way  makes the foreign key naming obvious and explicit and 
+also make the index have the same name as the integer key. We could have choosen 
+the newer, abstracted `references` syntax introduced in Rails 4 to create the 
+index for our foreign key. To show you let's redo our Model:  
+
+	$ rake db:rollback STEP=1 # go back one migration
+	$ rails destroy model Teacher
+	$ rails g model Teacher classroom:references first_name:string last_name:string
+	
+This gives us a migration with the new synax. Instead of `t.integer "classroom_id"` 
+and `add_index("teachers", "classroom_id")` we have a single line handling both: 
+`t.references :classroom, index: true, foreign_key: true`:  
+
+	class CreateTeachers < ActiveRecord::Migration
+	  def change
+	    create_table :teachers do |t|
+	      t.references :classroom, index: true, foreign_key: true
+	      t.string :first_name
+	      t.string :last_name
+	
+	      t.timestamps null: false
+	    end
+	  end
+	end
+
+If you the the same test in `rails console`, you will see the same results. 
 
 Let's create the Model/Migration for `Course` using another even quicker way. 
 Rails lets you include the desired columns right in the Rails `generate` command!  
 
-	$ rails g model Course teacher:references, name:string, description:text, teacher_id:integer:index
-
-The synax for this is `column_name:type, column_name:type,` etc. You can also add 
-and index for the foreign key with `parentname_id:integer:index` or in fact any 
-index with `indexname_id:type:index` but beware of non-integer indexes!  
-
-As seen before also could have choosen `teacher_id:integer` which makes the 
-foreign key naming obvious and explicit but we choose the newer, abstracted 
-`references` syntax introduced in Rails 4 to create the index for our foreign 
-key.  
+	$ rails g model Course teacher:references name:string description:text 
 
 Here is what our command generated:  
 
 	class CreateCourses < ActiveRecord::Migration
 	  def change
-	    create_table( :courses ) do |t|
-	      t.references, :teacher
-	      t.string, :name
-	      t.text, :description
-	      t.integer :teacher_id
+	    create_table :courses do |t|
+	      t.references :teacher, index: true, foreign_key: true
+	      t.string :name
+	      t.text :description
 	
 	      t.timestamps null: false
 	    end
-	    add_index( :courses, :teacher_id )
 	  end
 	end
 
-As you can see, this longer generate command really cut down on our development  time!  
 §
 
 --------------------------------------------------------------------------------
@@ -2294,6 +2369,8 @@ whitespace which was deleted for this guide:
  are used for error handling. Let's cut this file down by deleting the `private` 
  methods, making the remaining methods be empty and deleting 
  `before_action :set_classroom, only: [:show, :edit, :update, :destroy]`.  
+ 
+ 
  
  
  
