@@ -146,6 +146,16 @@ within the default environment which is development. We can also do
 	$ rails console production
 
 but __BEWARE!__ THis will actually modify the data on your live website's database! 
+
+__Rails dbconsole__  
+
+`rails console` will give you access to your database, no matter what lanauges your database uses, in Ruby on Rails syntax. If you are using MySQL, PostgreSQL, SQLite or SQLite3 and would like to access the database in it's own specific interface run:  
+
+	$ rails dbconsole # or rails db
+
+And Rails figures out which database you're using and drops you into whichever command line interface you would use with it. It will even figure out the command line parameters to give to it.  
+
+
 §
 
 --------------------------------------------------------------------------------

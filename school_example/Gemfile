@@ -45,3 +45,5 @@ group :development do
   gem 'spring'
 end
 
+# for formated queries in rails c
+gem 'hirb'

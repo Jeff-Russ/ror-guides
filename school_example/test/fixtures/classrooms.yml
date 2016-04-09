@@ -3,9 +3,7 @@
 one:
   room_num: 1
   lab_equip: false
-  permalink: MyString
 
 two:
   room_num: 1
   lab_equip: false
-  permalink: MyString
