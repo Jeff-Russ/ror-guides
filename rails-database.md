@@ -1,16 +1,12 @@
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 # MVC: Models and the Database
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Creating and Configuring Database
 
-__Creating a Database__  
+__Creating a Database:__ 
 
 Let's go over how to create a database. You should know how to do this not just from within Rails using the Rails command but also according to how it would be 
-done without Rails.  
-
-__In mySQL__  
+done without Rails. In mySQL: 
 
 	CREATE DATABASE db_name; 
 	SHOW DATABASES;          
@@ -19,7 +15,7 @@ __In mySQL__
 
 SKIP SKIP SKIP SKIP
 
-__Configuring App to DB__  
+__Configuring App to DB:__ 
 
 The first step is, of course, to make sure you have the proper Gem installed for your chosen database technology. 
 
@@ -36,17 +32,12 @@ The first step is, of course, to make sure you have the proper Gem installed for
 
 The `adapter:` value will change depending on what database tech you are working with. The `database:` value is the database name, which defaults to the app name followed by and underscore and the environment name. If you set up your mySQL database manually, you will likely create a user specifically for this app which you should then set to the value of `username:` rather than `root`. The `password:` should of course match the password you created for the user.  
   
-`socket:` is important because it's the file that Rails uses while connecting. This should be set automagically but if for any reason it does not, here is where you set it.  
-  
-To test your connection to the database you can do this in terminal:
+`socket:` is important because it's the file that Rails uses while connecting. This should be set automagically but if for any reason it does not, here is where you set it. To test your connection to the database you can do this in terminal:
 
 	$ rake db:schema:dump
 
 This has Rails connect to the database and export the schema in a new file `db/schema.rb`. If you don't get an error and you do see this file, you connected successfully. 
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## What is a RDMS?
 
 The analogy of a database to a spreadsheet is helpful but incomplete. First the helpful part; If one were to arrange a spreadsheet as if it was a true database you would start with a horizontal row atop the spreadsheet with each cell labeling what kind of data goes below it in each column, i.e. first-name, last-name, address, etc.  
@@ -62,9 +53,7 @@ What make Relational Databases Management System distict from spreadsheets is th
 listed in mulitiple tables which are linked together with __foreign keys__. We'll see more about foreign keys later but just know they provide a way of linking a row of data in one table to another. For example, we may have a table for contact info on people and another on medical history. A single patient has their data in multiple tables but within the tables cells there are references to other table rows in in order to link them together. This is helpful for organizing your database into smaller pieces rather than just having one big, unweildy table.  
   
 Another thing that makes spreadsheets and RDMS different is __indexes__. An index on a RDMS table allows for rapid lookup of a record. In spreadsheets you are just looking things up with your own eyes but in a real database, lookups are often done in software and need to be blazing fast!  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## What is Schema? Migration? Model?
 
 __What are Schemas?__  
@@ -72,7 +61,6 @@ __What are Schemas?__
 Getting back to the similarities, the term we use in RDMS for all of the labels without the data populated within it is the __schema__ the __schema__ is like the description of structure of the database. It's the setup you do to prepare a spreadsheet before you enter the tables. Rails has a way of abstracting this schema from the actual database's language into or Rails application. This means a few things, we can configure and use our database using Ruby language, using Rails classes and methods rather than using SQL code or whatever the database uses. It also (usually) means that we can define our database scheme without even choosing which database technology to use! In fact, we can use a small simple DBMS during production and then another one more suited to high traffic in our deployment, all without needing to change much or any of our code.  
 
 To summarize, migrations are a blueprints that describe how the structure of you database is organized. On a more concrete level, your schema is stored as a single, auto-generated Ruby file in your application called `db/schema.rb`. This file is not the place where the database's scheme is _defined_ but instead can be thought of as a place where the schema is _documented_. If you want to actually modify the schema, the place to do that is from migration files as we shall see next. Migration files are a bit more scattered and are not the best place for the developer to get a birds-eye view of the database's struture the way `db/schema.rb` is.  
-
 
 __What are Migrations?__  
 
@@ -94,46 +82,37 @@ the database schema in the realm of Ruby code instead of database languages like
 
 __What are Models?__  
 
-Once we have migrations run we have a workable databases that can be accessed with the Ruby language, but our Rails apps need to actually interact (create, read, update and delete rows) via another part of RoR called __models__ models are not exclusive to Rails, they are the __M__ in __MVC__.  
-  
-In Rails
+Once we have migrations run we have a workable databases that can be accessed with the Ruby language, but our Rails apps need to actually interact (create, read, update and delete rows) via another part of RoR called __models__ models are not exclusive to Rails, they are the __M__ in __MVC__. In Rails:  
 
 > one table = one model  
 > each model/table is a single real-life noun (person, product, etc)  
 
 Once we run migrations, their work is essentially done and models come into play as our messenger between the rails app and the database. Controllers will take user input from the view and put it into the database via the models. Likewise they can look at the data in the db via the model give it to the views for display to the user. Here is the acronym said by many, not just Rails folks, to outline the operations involed when working with a database:  
 
-__CRUD__  
+__CRUD:__ 
 > Create  
 > Read  
 > Update  
 > Delete  
 
 Beyond the CRUD roles, Models also the appropriate place _process_ the incoming or outcoming data.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Rails Naming Conventions 
 
 Before we actually create some migrations lets get some naming conventions clear. Naming conventions matter a lot in Rails because Rails links the various parts of your app by filenames, classnames and tablenames. If you don't follow the conventions, these things will loose their connection. You can override these defaults with our own configuration but development will be faster and easier if we follow them. 
 
 As you probably know, Class names are camelCase but starting with a capital (aka PascalCase) and method names are snake_case. This convention only applies to the actual code and not the file names. the file names are always snake\_case ( no capitals anywhere).  
 
-Models are Classes and therefore follow PascaCase but, in addition to that, you should know that model names are SINGULAR as they define a SINGLE model for many instances. Any controller that refer to models in their name should do so in a plural form. For example, You many have a `User` model in file called 
-`app/models/user.rb` and a controller called `UsersController` that sits in a file called `app/controllers/users_controller.rb`.  
+Models are Classes and therefore follow PascaCase but, in addition to that, you should know that model names are SINGULAR as they define a SINGLE model for many instances. Any controller that refer to models in their name should do so in a plural form. For example, You many have a `User` model in file called `app/models/user.rb` and a controller called `UsersController` that sits in a file called `app/controllers/users_controller.rb`.  
 
 Table names although they are the database mirror of our Rails model, are snake\_case and pluralized; for example `invoice_items`, `orders`.  
 
-Visit [here](http://itsignals.cascadia.com.au/?p=7)  and [here](http://alexander-clark.com/blog/rails-conventions-singular-or-plural/) for more naming conventions.  
-§
-
---------------------------------------------------------------------------------
+Visit [\<here\>](http://itsignals.cascadia.com.au/?p=7)  and [\<here\>](http://alexander-clark.com/blog/rails-conventions-singular-or-plural/) for more naming conventions.  
+________________________________________________________________________________
 ## Generating Models and Migrations
 
 The first time you create a model you will need both the model .rb file and at least one migration .rb file. Subsequent changes to the model do not require more model files but SHOULD involve you modifing the database by creating more migration files rather than modifying pre-existing ones. For this reason, when you run: `rails generate model` it will create both the model and migration files. You also have the option of `rails generate migration` which will generate a migration file but not a model file. (note that there is an alias for `generate` which is just `g`).  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Naming Conventions with Generate
 
 It's important to realize that all `generate` is doing is generating file and filenames. It's not doing anything magical like linking them together. It's the 
@@ -146,9 +125,7 @@ When it comes to the issue of plural vs singular, The command you type should ad
 type `rails g model User` or `rails g model user` but don't type the plural versions of these.
 
 In contrast, if you are working with __migrations__ for these you should use the __pluralized__ versions. For example, `rails g migration ModifyUsers` or `rails g migration modify_users`. 
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Object Relational Mapping 
 
 It may seems obvious but Ruby and SQL are vastly different languages, each with different concept and implimentation of an "object." The goal of Object-Relational Mapping (ORM) is to serve as a bridge between these two. Our app has Ruby objects which should mirror the "objects" in the database. Rails has several Ruby classes that contruct this bridge.  
@@ -177,15 +154,12 @@ When we use `generate model User`, our user.rb file has boilerplate code with a 
 
 __ActiveRecord::Relation__ (aka "Active Relation" or "ARel") was added in Rails version 3. The line between ActiveRecord and Active Relation is a bit blurred. 
 Many things you do in ActiveRecord::Base actually rely heavily on ActiveRecord::Relation. ARel uses relational algebra to simplify the generation of complex database queries. Small queries can be chained like we see in Ruby objects. ARel is used for things like joins and aggregations, using efficient SQL and timed executions which wait until the actual query is needed. 
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 # Migration Basics
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Adding / Removing Tables & Columns
 
-__Adding / Removing Tables__  
+__Adding / Removing Tables:__ 
 
 It's helpful to fill out your migration the long way using `up` and `down` before relying the shortcut `change` method. Here we  use `rails g model User` and we get:
 
@@ -197,7 +171,6 @@ It's helpful to fill out your migration the long way using `up` and `down` befor
 	  end
 	end
 	
-
 Here we see the `create_table` method which is used to create a database table we are calling `:users`. This Ruby symbol `:users` is notably plural (as tables are) as opposed to Models (singular). `t` is the actual table, to which we are adding attributes via a Ruby `do` block. 
 
 	class CreateUsers < ActiveRecord::Migration
@@ -216,7 +189,7 @@ Here we see the `create_table` method which is used to create a database table w
 
 Now we have a new method called `drop_table` which is the opposite of `create_table`. It is not in block form the way `create_table` because it doesn't need to know anything about the table in order to delete it. As a side note, notice we added parenthesis to the argument in `create_table`. As a matter of style, this guide will use parentheis for arguments in method calls when they are in block form. 
 
-__Adding Columns__  
+__Adding Columns:__ 
 
 The create\_table block accepts two ways to add columns to a database. Here is one:
 
@@ -231,9 +204,7 @@ Now for the shorter form:
 	t.data_type "label_name", options
 
 This is the version you will see in wild more often but you should be familiar with both since sometimes you will not have this optional shorter version available. 
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Data-Types and Options
 
 Rails defines a number or data-types which it then translates to the data-types native to your chosen database technology:
@@ -269,7 +240,7 @@ We can shorten it as seen above, and then further to use newer Ruby hash syntax:
 	# new hash syntax:
 	t.string "user_name", limit: 10
 
-__Timestamps__  
+__Timestamps:__ 
 
 Rails is, in a sense, waiting for us to possibly put these two columns in:
 
@@ -282,12 +253,10 @@ When Rails sees these it will automatically update and populate them for us when
 
 If you put this one line in, Rails essentially replaces it with the two lines seen before. 
 
-__ID__  
+__ID:__ 
 
 Note that Rails will always create an id, an __auto-incrementing primary key__ with the data type __integer__, for each table since this is something you will almost always need. 
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Running Basic Migrations
 
 To run the migration, execute this command at the __root of your project__:
@@ -296,7 +265,7 @@ To run the migration, execute this command at the __root of your project__:
 
 By running this without a second argument, you are essentially running `rake db:migrate RAILS_ENV=development` since that is the default. Note that this runs __all migrations that have not yet been run__.  
 
-__Verify Changes on Database__  
+__Verify Changes on Database:__ 
 
 At this point you can verify it worked by going into your database's command line and checking (with `SHOW TABLES;` then perhaps `SHOW FIELDS FROM users;`, for example). You should see everything you specified plus the `id` integer that is automatically added. This is a good place to observe Rail's default options for all of the fields you specified as well as __id__.
 
@@ -306,7 +275,7 @@ Something else you can verify from your respective database's command line is th
 
 and you will see each migration _file_ that went into the current state (schema) of your database. They are listed by the long integer timestamp prefixes seen in the filename of each .rb file used for the migration(s). This is a good way to check the state (schema) of the database from the database's perspective. This `schema_migrations` table is managed by Rails and you typically will not (or should not) make any changes to it directly. 
 
-__Verify Changes from Rails app__  
+__Verify Changes from Rails app:__ 
 
 After running the migration, not only will your database change but the `db/schema.rb` file in your application will change to reflect the migration as well. If all went well, the `schema.rb` file should reflect exactly what you see on the database itself. 
 
@@ -317,9 +286,7 @@ If you want to roll back your database to it's pristine state, before any migrat
 `VERSION=0` is another environment variable representing the state of the database before any migrations. __All environment variables must be ALL\_CAPS__, this is very important. 
 
 Now if you run `SHOW TABLES;` you will those tables added are no longer there. Also, if you run `SELECT * FROM schema_migrations;` you will see that that table is now empty. 
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Running Specific Migrations
 
 Run this to see a report of the current state of migrations:
@@ -347,9 +314,8 @@ there is also
 	db:rollback	                 # rollback last run migration(i.e. Default STEP=1)
 	                             
 	db:rollback STEP=4           # rollback last 4 migrations.
-§
 
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Migration Methods
 
 Within our migration files we have various methods available to us in addition to `create_table` and `drop_table` which we have already seen:
@@ -399,10 +365,7 @@ DANGER: This, of course, only works with SQL and Rails will not alter your input
 When you create a migration file that is meant to alter a pre-existing table, you should name it such that it's purpose is apparent, like `change_users` or `alter_users`. You will often want to plant a few `puts` into your `up` and `down` methods so that when you run the migrations you can be reminded of what is going on.  
 
 Whenever you create a new migration you should test not only it's `up`functionality but it's `down`. It's much better to catch mistakes before the database is actually populated with real data!!
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## When Things Go Wrong 
 
 Migrations can be stuck in a broken state where you can't run `up` or `down` if you're not careful. For example, you could have `delete_column` for column names that don't exit at a given point. This might seem like an easy typo to fix but sometimes if custom migrations are run, you might not have forseen that point in time. When things like this happen you will see the dreaded:
@@ -417,26 +380,20 @@ The other, and much easier, way would be to comment out the portion of offending
 
 All of this needs to be ironed out before you deploy. Fixing a problem on a development database is one thing but in production it will mean often mean a serious loss of data. Keep your migration files small, with each only addressing a single table if you can. TEST EVERYTHING THOROUGHLY before deploying any part of your database, especially when those parts are available to be populated with actual data!  
 
-__Linking Model names to Table Names__  
+__Linking Model names to Table Names:__ 
 Sometimes you might have legacy code that does not follow naming conventions, or perhaps a migration changed a Table name and the model class still matches the old, now deleted tablename. You can, within your model class, point it to any tablename with:  
 
 	self.table_name = "new_name"
 
 And with that it will be fixed. Of course you could also just rename the model.rb file and the classname within it.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 # Introducing Our Example Database
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 
 It's sometimes hard to understand database concepts without a concrete example. For that reason let's choose the example of a high school's database for our database Schema. Let's start by thinking of the main "objects" that are at play in a high school we have a classrooms, teachers, courses and students. We won't consider the student's grades at the moment, just the their enrollments and the details of each course in terms of where it is and who is teaching it. 
 
 Each of these things is actually a Model in the strictest sense of the word; they are Ruby classes in Rails, each representing A single table. The relationship between these tables is obviously inter-related and for that reason we need to introduction some details about the "relational" part or relational databases.  
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Database "Relationships" are Rails "Associations"  
 
 Let's think of our example of the high school. Assume each teacher has only one classroom and each classroom has only one teacher. Both the classroom and it's teacher have many courses it teaches. Students freely pass between different classrooms taking different courses but teachers stay in their respective rooms.  
@@ -454,9 +411,7 @@ With the `Classroom` and `Teacher` models, we will learn about the so called "__
 With the `Teacher` and `Course` models, we will learn a little bit about the so called "__One-to-many__" relationship. Here, the Course should be the side that holds the __foreign key__ since. If it was the Teacher side that held it, the `teachers` table would need a new row each time a teacher was assigned to a new course. Since each course will only ever have ONE teacher, it makes sense to give it that key since it's schema won't need adjustment each time there is a new course assignment.   
 
 We will ignore the `Student` model for now since that __Many-to-many__ relationship is a lot more complicated. They make use of a third table called a "__JOIN__" which handles the complex network of relationships rather than having the two tables handle them themselves. I'm sure you can tell by the pictorial why one might want to bring in something else to handle that messy network of connections.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Coding our Example 
 
 Here is the game plan for migrations as pseudocode:   
@@ -475,7 +430,7 @@ An __index__ is similar to a __key__ in that they are both integers for used for
 
 Let's do it  
 
-__CLASSROOM model/migration__  
+__CLASSROOM model/migration:__ 
 
 	$ rails generate model Classroom
 
@@ -514,7 +469,7 @@ We really didn't have to do anything unexpected with the `down` method. In this 
 
 __REMEMBER:__ `create_table` is reversable because the `add_column` method is __reversable__. The `remove_column` method is __NOT reversable__. The reason for this is that when you add a column, you provide the full definition for it. `remove_column` doesn't need the full definition but `add_column` does. Rails cannot invert `remove_column` to `add_column` because it lacks the full definition needed to create a column!    
 
-__Classroom: The Quicker Way__  
+__Classroom: The Quicker Way:__ 
 
 Let's delete this and do it a different way:  
 
@@ -637,45 +592,37 @@ Here is what our command generated:
 __STUDENT model/migration__
 
 	$ rails g model Student first_name:string last_name:string
-§
-
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 # CRUDing Records with ActiveRecord
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 
 The following examples will be show in the __rails console__ since it gives us some nice feedback on what we're doing but keep in mind that the same syntax is valid in Ruby code elsewhere. Also not that, contrary to methods given to us in ARel, perform their action immediately. 
-§
+________________________________________________________________________________
+## New vs Create  
 
---------------------------------------------------------------------------------
-## New & Create  
+__Model.new__  
 
-	$ rails console             # enter the Rails Console
-	> teacher = Teacher.new     # create object called teacher in temp. memory 
-	> teacher.new_record?       # returns true if teacher did not already exist 
-	> teacher.first_name = "Jo" # set first_name attr. to "Jo" in temp. memory 
-	> teacher.first_name        # prints out "Jo"
-	> teacher.new_record?       # returns true because we haven't saved yet
-	> teacher.save              # runs SQL INSERT or whatever you are using
-	> teacher.new_record?       # now we will see false
-	> teacher.id                # prints the newly created integer id. 
+Each model has a class method called `new` which is our constructor. Here it is being called without arguments: 
 
-__Using Mass Assignment__  
+	$ rails console         # enter the Rails Console
+	> teacher = Teacher.new # create object called teacher in temp. memory  
 
-This is the long way to do things. We could have sent in values at the time of instantiation as aruguments to the constructor. The `new` constructor takes `:symbol => value` pairs as arguments. You could populate the entire record (row) with on line in the Rails Console (known as __"Mass Assignment"__). You don't have to provide all the attributes, you can provide just the ones you want and let the defaults handle the rest. This only works if they actually do have defaults; you can set an attribute to reject not having it's value explicitly set as we will see later on with __"validations"__.  
+We would then set each attribute and run `teacher.save`. This is the long way to do things. We could have sent in values at the time of instantiation as aruguments to the constructor as we'll see next.  
+
+__new With Arguments__ 
+
+The `new` constructor takes `:key => value` pairs as arguments or the newer `key: value` syntax. The `:key` is actaually the column name in the table which, from Rail's pespective, is a data attribute of the Model class. You could populate the entire record (row) with on line in the Rails Console (known as __"Mass Assignment"__). You don't have to provide all the attributes, you can provide just the (non required) ones you want and let the defaults handle the rest. This only works if they actually do have defaults; you can set an attribute to reject not having it's value explicitly set as we will see later on with __"validations"__.  
 
 	> teacher2 = Teacher.new(first_name: "Jeffrey", last_name: "Russ")
 	> teacher2.save
 	 # SQL INSERT ...
 	 => true
 
-One handy fact is that `teacher.save` returns true if it was sucessful so we can make it the condition of an `if` statement for error handling. If the data entered does not meet the requirements of your model or the database, false will be returned. You could also do the following but as you'll see in the next section, 
-there is a better "one liner" option:  
+One handy fact is that `teacher.save` returns true if it was sucessful so we can make it the condition of an `if` statement for error handling. If the data entered does not meet the requirements of your model or the database, false will be returned. __One reason for `save` failing is that you have not set a required field.__ You could also do the following but as you'll see in the next section, there is a better "one liner" option:  
 
 	> teacher2 = Teacher.new(first_name: "Dennis", last_name: "Richie").save
 
-__Using Quickest Way__  
+__Model.create__ 
 
 We used mass assignment with the `new` method, which then requires us to run `save` but we have another option of using `create` instead of `new`, which does not require `save` afterward. Unlike `save`, `create` does not return a boolean, it returns the object just like `new` does so we'll need to find out if it was successful by other means.  
 
@@ -687,35 +634,86 @@ Note that these three object we created are only temporary variables in our curr
 	 => #<Teacher id: 3, classroom_id: nil, first_name: "Yukihiro", last_name: "Matsumoto", created_at: "2016-04-08 19:28:25", updated_at: "2016-04-08 19:28:25"> 
 	> exit
 	$ rails console
-	> teacher3
+	> teacher3 # this was a temp object and no longer exists!
 	  NameError: undefined local variable or method `teacher3' for main:Object
-§
 
---------------------------------------------------------------------------------
-## Find/Save & Find/Update Attributes  
+__Model.create( [array] )__  
 
-Your model's class has a class method called `find` which takes and id (aka the primary key) as argument and returns the appropriate record's object.   
+You can create many records with one call to create if you argument is an array of hashes. The return will be an array in the same format that you will get if you call `Model.all`, which outputs the whole table, only this is only containing the rows you just added:  
 
-	> teacher = Teacher.find(1) # runs SELECT
-		=> all...the...data...
-	> teacher.new_record? 
-		=> false
-	> teacher.first_name = "Bob" 
-	> teacher.save   # This will run UPDATE because it's not a new record
-		=> all...the...new...data... 
+	> new_courses = Courses.create([{ :name => 'test1' }, { :name => 'test2' }])
+	 => [#<Course id: 38, name: "test1">, #<Course id: 39, name: "test2">] # this is abbreviated for this guide
 
-__Using Mass Assignment__  
+If you look at `new_courses[1]` you will see `#<Course id: 38, name: "test1">` You can also format the output if you use the `Hirb` gem: 
 
-After you run find and get the object, you can use the `update_attributes` method with all of your attributes as arguments, in the same way as you would with `new` only this is with a pre-existing record. Since we already have the object, `update_attributes` can return a boolean instead of the object, so we can use that for verifying the operation was successful.  
+	> Hirb.enable
+	> new_courses
+		+----+-------+-------------+------------------+------------------+
+		| id | name  | description | created_at       | updated_at       |
+		+----+-------+-------------+------------------+------------------+
+		| 38 | test1 |             | 2016-04-11 02:05 | 2016-04-11 02:05 |
+		| 39 | test2 |             | 2016-04-11 02:05 | 2016-04-11 02:05 |
+		+----+-------+-------------+------------------+------------------+
+		
+	> new_courses[1]
+		+----+-------+-------------+------------------+------------------+
+		| id | name  | description | created_at       | updated_at       |
+		+----+-------+-------------+------------------+------------------+
+		| 38 | test1 |             | 2016-04-11 02:05 | 2016-04-11 02:05 |
+		+----+-------+-------------+------------------+------------------+
+
+
+________________________________________________________________________________
+## Find and other Simple Queries
+
+Once you enter the console you might like to take a look at what's on the database just to get an overview.
+
+	> ActiveRecord::Base.connection.tables # this is to display all tables
+	> Teacher.column_names                 # this shows the columns for the teachers table
+	> Hirb.erb                             # for nice formating (optional)
+	> Teacher.all                          # shows the entire teachers table with data or nil if empty
+
+`Teacher.all` probably showed you that the `teachers` table has one record with an id of 1. This is the first record and probably also the last. The following can be used to get at that row:  
+
+	Teacher.find(1) # returns the row with id of 1
+	Teacher.first   # returns the first row or nil
+	Teacher.last    # returns the last row or nil
+
+By saying they "return the row" we really mean an object from the class `Teacher` which effectively is a database row. Therefore, we can use this row to instantate a Ruby object. 
+
+	> teach_id1 = Teacher.find(1) # save to object
+	> teach_id1.class             # => Teacher( hash of attributes... ) 
+	> teach_id1.class.superclass  # => ActiveRecord::Base 
+	> teach_id1.new_record?       # returns false because teacher it already existed
+
+	
+If we created a new object with the `new` method (not by grabbing one from the database) `.new_record` would return `true`.  
+
+Each column name in a table is also a data attribute avaible on objects pretaining to the table.
+
+	> teach_id1.id                # prints the row's integer id. 
+	> teach_id1.first_name        # prints out "Jo"
+
+We haven't made any change to the object or the database. Let's do that next.  
+
+
+________________________________________________________________________________
+## Simple Assignment vs Update_Attributes  
+
+We said that each each column name is also a data attribute of the object and we used `.id` and `.first_name` to view the current value. We can also assign to this attribute with the `=` operator but this assignment only effect the object, which is just a temporary representation of the row on the table. In order to push that change to the database we call the `save` method.  
+
+	> teach_id1.first_name = "Jeff"  # we've only modified the temp object!
+	> teacher.save                   # runs SQL UPDATE to save on db
+ 
+__Using Mass Assignment:__ 
+
+You can also use the `update_attributes` method with all of your attributes as `key: value` arguments. It's the same syntax as you would use with `new` only this is with a pre-existing record. Since we already have the object, `update_attributes` returns a boolean instead of the object, so we can use that for verifying the operation was successful.  
 
 	> teacher.update_attributes(first_name: "Jeff", last_name: "Russ")
 	  # runs SQL UPDATE
 	 => true
-
-§
-
---------------------------------------------------------------------------------
-## Find/Destroy Records  
+________________________________________________________________________________
+## Delete/Destroy Records  
 
 Notice the title says "destroy records" and not "delete records". There is a `delete` method bypasses some Rails features and will not behaive as you expect so it's better to use the `destroy` method. The `delete` method will leave you with an "orphaned row" and `destroy` will not. After you run `find`:  
 
@@ -726,23 +724,33 @@ The hash still sits in memory even though it was deleted from the database. It's
 
 NOTE that whatever id was used by the deleted record is then abandoned. Future records will not take over this id integer but rather then will just increment the last id, whether or not it still exists. You can reset the SQL `AUTO_INCREMENT` value but this is not recommended unless you have a good reason!  
 
-	SQL> ALTER TABLE tablename AUTO_INCREMENT = 1
+	SQL> ALTER TABLE tablename AUTO_INCREMENT = 1;
 
-§
+Or in SQLite:
 
---------------------------------------------------------------------------------
+	SQLite> DELETE FROM sqlite_sequence WHERE NAME = 'tablename';
+
+In RoR:
+
+	> tablename = YOUR_TABLE_NAME
+	> SQL_STRING = "DELETE FROM sqlite_sequence WHERE NAME = '#{tablename}';" # or whatever your db expects
+	> ActiveRecord::Base.connection.execute(SQL_STRING)
+
+You can also delete the entire contents of a table with:  
+
+	> ModelName.delete_all  # fast, straight to SQL way
+	> ModelName.destroy_all # checks dependencies and callbacks first
+	
+________________________________________________________________________________
 # Database Finders & Queries  
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 
 Most of your interaction with the database via Rails will actually be queries (reading data, not writing). For that reason, Rails provides more than one way to do this.  
 
 Remember the distinction between normal __ActiveRecord__ and what has been called __ARel (Active Relation)__ outlined before. When it comes to making queries to the database, you have a choice between these two . The former includes methods like `find` and the various `find_by` methods we will see next. They execute a single statement of SQL and do so immediately. The later include methods like `where` which are used to gradually "compose" a complex SQL queries until the time comes to run it.  
 
 Be aware that some `find_by` related methods are deprecated, about to be removed or simply neglected in favor of the newer ARel Query methods. This guide tries to stick to only the common `find_by` methods but don't be surprised if one or more methods are removed by the time you read this.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Finder Methods
 
 Note that `find` is often not the ideal choice. The reason for this is that when it fails, it returns a severe error called `ActiveRecord::RecordNotFound` which usually results in a __404__ page to the user. Therefore you should only use `find` if you really are sure that the object exists, which by the way is not unusual.  
@@ -756,15 +764,8 @@ Dynamic Finders are actually "missing methods" handled by a Rails method called 
 	> Teacher.find_by_first_name("Jeff")
 	  # SQL SELECT
 	 => # the hash
-  
-We also have:  
 
-	all   = Teacher.all     # returns nil or an array of every record
-	first = Teacher.first   # returns nil or the first record
-	last  = Teacher.last    # returns nil of the first record
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## ARel Query Methods   
 
 As you already know, ARel queries wait until they are needed before actually being performed. __Query Methods__ don't return an array like ActiveRecord does, they return an __Relation Object__, which can then be chained together with other query methods and when you are done, Active Relation will take them all and construct one big SQL statement. This way it's much more efficient.  
@@ -821,7 +822,7 @@ Once you have assemble a usable query you can call a method called `find_by_sql`
 
 Note that the above examples use the hash style argument. There are three possible arugument styles:  
 
-1. __where with STRING... `Model.where(raw_SQL_string)`__  
+1. __where with STRING... `Model.where(raw_SQL_string)`:__ 
    
    __BEWARE__ of how you use `where` when taking __raw SQL string__ because it invites the possibility of __SQL Injection__. If you give the user control of even a part of this string they could abuse it to insert malicious code. You should generally only use hard-coded strings that take no user input either directly or from data in the database that might have originated from user input. Even though the example below looks as if the string in the argument is Ruby, it's actually SQL (remember that model's attributes and their values are actually in hash syntax in Rails, not using an equal sign assignment operator)  
    
@@ -829,7 +830,7 @@ Note that the above examples use the hash style argument. There are three possib
    
    This is actually a conditional statement, at least in the resulting SQL, where it evaluated as true when `orders_count = '2'` Within these strings, you can insert variables using Ruby's string interpolation like `"orders_count = #{var}"` and, depending on how that `var` is set, this could be where the danger lies.  
    
-2. __where with ARRAY... `Model.where([template_w_placeholders, inserts...])`__  
+2. __where with ARRAY... `Model.where([template_w_placeholders, inserts...])`:__ 
    
    The alternative to using a full SQL string is to use an __array__. The first element of the array is a __template__ that contains portions of SQL together with __placeholders__. The remaining element(s) are the inserts for the placeholders. This array argument way is safer because Rails has a chance to escape the inserted SQL before running it.  
    
@@ -837,7 +838,7 @@ Note that the above examples use the hash style argument. There are three possib
    
    The square brackets here are actually optional, either way it will be interpreted as an array. The question mark `?` is the placeholder and `2` will be inserted in it.  
    
-3. __where with HASH... `Model.where(hash_as_condition)`__  
+3. __where with HASH... `Model.where(hash_as_condition)`:__ 
    
    This option also provides safe SQL escaping and is a simpler approach compared to both strings and arrays. Each key-value pair will be joined by an SQL `AND` before generating the SQL `WHERE` clause.   
    
@@ -853,7 +854,7 @@ Note that the above examples use the hash style argument. There are three possib
 
 These are all chainable with each other and `where`. The order of the chaining doesn't _usually_ matter  
 
-__Syntax for sql_fragment in `order` Method's Argument__  
+__Syntax for sql_fragment in `order` Method's Argument:__ 
 
 The format for this argument roughly follows `table_name.column_name ASC /DESC`. Since we are calling `order` on a Model which essentially IS a table, we often do not need the `table_name` part of this argument. It's not necessary for for single tables but it is recommended for joined tables and REQUIRED when joined tables have the same column name. So if you have a `users` table joined to a `login_password` table you might want to specify where `name` is:
 
@@ -862,10 +863,7 @@ The format for this argument roughly follows `table_name.column_name ASC /DESC`.
 This will find all pro users and sort them in ascending order by name as it appears in the users table. You can also have multiple arguments: 
 
 	User.where(account: "pro").order("users.visible DESC, users.name ASC") 
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Custom Queries with Named Scopes
 
 So far we have interacted with the database with methods provided to us by the Rails Framework. We didn't need add any functionality to our Models in order to perform these queries and other CRUD operations. We also have __Named Scopes__, which allow us to define custom queries in our models using multiple __Active Relation query methods__. Our resulting __Named Scopes__ can be called taking arguments just like pre-existing Rails methods. Prior to Rails 4, __Lamda Syntax__ was option in them but now it's required.  
@@ -888,7 +886,7 @@ Be aware that these both are really identical to just creating a class method li
 
 The reason why lambda syntax is now required is that lambda are evaluated when they are called and not when they are defined. This matters when you use things like `Time.now` since you want that to be evaluated each time the lambda is called. This created a lot of errors and confusion to lambdas were made a requirement.   
 	
-__Named Scopes Taking Arguments__  
+__Named Scopes Taking Arguments:__ 
 
 Here is the scope taking an argument. Note that this is one case where the __Stabby Sytax__ would not be the same:  
 
@@ -897,13 +895,10 @@ Here is the scope taking an argument. Note that this is one case where the __Sta
 This would be called like: `User.account('pro')`  
 
 __Named Scoped can be chained when they are called__ and can also have chainging within them, making for some really compacted sytax that would otherwise be a quite verbose set of queries.   
-
-§
-
+________________________________________________________________________________
 ## Rails Console Query Output Formatting
 
-If you have done queries directly in SQL you'll know that the format of the output is much better than we see with ActiveRecord in the rails console. Although not necessary, it might be nice to get a more formatted output from the rails console. 
-One option is to ask for YAML output with a `y`:  
+If you have done queries directly in SQL you'll know that the format of the output is much better than we see with ActiveRecord in the rails console. Although not necessary, it might be nicer and easier to read if we can get a more formatted output from the rails console. One, non invasive, option is to ask for YAML output with a `y`:  
 
 	> y Teacher.all  # or...  puts Teacher.all.to_yaml
 		- !ruby/object:Teacher
@@ -939,18 +934,13 @@ For a SQL-like format, you can use the hirb gem by cldwalker:
 	+----+--------------+------------+-----------+-------------+-------------+
 	3 rows in set
 
-Much nicer! 
-
---------------------------------------------------------------------------------
+Much easier to read! 
+________________________________________________________________________________
 # Database Associations
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 
 Relational databases make it easy to link tables together using __foreign keys__ and __joins__. If you want to work with data in related tables you could go about that by looking at a record's foreign key and then finding the related data by making a second query to to the related table but this is a bit tedious. It would be best if our Ruby side of things had prior knowledge about the relationships between tables and in fact it does. __ActiveRecord__ has what it calls __associations__ that are used to define relationships between data in separate tables.  
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Associations In Our Example 
 
 __INSERT STUFF__
@@ -970,7 +960,7 @@ Let's first look at how the relationships are conceived of in RDBMS and in Rails
 	* the foreign keys __MUST__ go on the `courses` tables 
 	<br><br>
 * __Many-to-many__, abbrevated as __m:m__   
-example: __students\<JOIN\>courses__
+example: __students \<- JOIN -\> courses__
 	* a course `has_and_belongs_to_many :students`
 	* a student `has_and_belongs_to_many :courses`
 	* this must be a __JOIN__ since we have two foreign keys 
@@ -1005,10 +995,7 @@ When you define foreign keys and Join tables in the migration files and then run
 Strictly speaking, on the database, _tables_ are NOT related to other _tables_, _rows_ are associated with _rows_ in other tables _because_ the table has a foreign key column.  
 
 Once you have your schema loaded into the database you can start making actual records. __The methods added to the Models by the inclusion of association methods change what happens when you set a row's foreign key and this is when the association is made__
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## One-to-One Relationships
 
 __As Per Our Classroom Example:__  
@@ -1027,14 +1014,58 @@ __One-to-one relationships are not used very commonly__ because often the data t
 
 All told, you may want to avoid one-to-one relationships unless you have a good reason. They are often clunky and result in a database with too many tables. Also, if your schema evolves and you wind up adding a "row" for something you will then be dealing with "many" and you will need to break your associations and set up a new schema.   
 
-__reload console after changing association methods__
+__To Sumarize:__  
+>
+* one-to-one relationships are not very common  
+* use one-to-one to break up tables or...  
+* to reject the possibility of additional assocations or..   
+* use one-to-one to help with frequent queries performance  
 
-__About One-to-One Relationships__  
 
-> 
-* one-to-one relationships are not very common
-* use one-to-one to break up tables or...
-* use one-to-one to help with frequent queries performance
+__Remember to reload console after changing association methods!__ When you do this you will see that objects created from the models actually had new methods magically added to them behind the scenes. Take this as a premise:  
+
+> Create and setup `User` Model (without association) and migration  
+> Create and setup `Page` Model (without association) and migration with foreign key
+
+	$ rake db:migrate # creates tables `users` and `pages`
+	$ rails console
+	> first_user = User.new
+	> first_page = Page.new
+
+> In `User` Model, add `has_one :page` This gives it `.page` method  
+> In `Page` Model, add `belongs_to :page` gives it a `.user` method  
+
+
+The Rails association methods acutally generated customly named methods in both models, each one named to match the other Model's table name in the actual database. Each of these methods can be used to set the association with a row on the other table OR to see if there currently is one already set:
+	
+The `User` object `first_user` now has:
+>* for getting: `first_user.page`   
+>* for setting: `first_user.page = first_page`  
+
+The `Page` object `first_page` now has:  
+>* for getting: `first_page.user`  
+>* for setting: `first_page.user = first_user`
+
+__NOTE__ that the method names rails creates don't exactly match the table names. The method names are singularized tables name when there is a singular relationship and the same as the table (already plural) table name when there is a plural relationship. It's the name naming we passed into the association methods in the model's class definitions.   
+
+Since the two objects we instantated in the console were defined BEFORE we changed their class's definitions they do not have these methods! The class defintions are loaded into the console when the console is started. Not only do we have to re-instantiate the object, we need to first restart the console:  
+	
+	> first_user.page # NO METHOD ERROR
+	> first_page.user # NO METHOD ERROR
+	> exit
+	$ rails console
+	>
+	> first_user = User.find(1)
+	> first_page = Page.find(1)
+	>
+	> first user.page # we no longer get the error!
+	> first_page.user # we no longer get the error!
+
+__NOTE__ that the two method names on the two different sides seem to indicate an identical functionality but they actually behaive differently depending according association method you placed in the model's class. This difference will be clarified ones we get our hands on an actual working example but here is a spoiler:  
+>
+* `belongs_to_other.other = other_obj` does NOT automatically save  
+* `has_one_other.other = other_obj` DOES automatically save and right away  
+
 
 ### Updating our Example's One-to-One Relationships  
 
@@ -1045,7 +1076,7 @@ With our example: `Teacher` and `Classroom` we already have the foreign key and 
 
 When you have these associations added, it triggers Rails to do some magic behind the scenes. It sets up some automatic methods for you for both models. 
 
-__Associating Two Specific Records__  
+__Associating Two Specific Records:__  
 
 First let's make some classrooms and instatiate some teacher objects:  
 
@@ -1061,11 +1092,11 @@ Now that we have association methods set, we have new methods for each object:
   
 > `teach1.classroom` and `room1.teacher`  
 
-The above two are meant to return the object on the other side of the relation if it exists or `nil` if it doesn't. The same methods can be used for assignment:  
+The above two are meant to return the object on the other side of the relation if it exists or `nil` if it doesn't. Here are those methods for assignment:    
 
 > `teach1.classroom = room1` or `room1.teacher = teach1`
 
-These two might seem to be the same but they are not. Assigning an object to a object with a `belongs_to` association does not automatically save the object. It does not save the associated object either. This might seem backwards since the object with `belongs_to` is the one with the foreign key but it's true. You can use either but if you run `teach1.classroom = room1` you must then run `teach1.save` OR `room.save`. Doing so adds the foreign key and then saves both to the database. Let's do it the better way. First a test:   
+As we started to say before, the two might seem to be the same but they are not. __Assigning an object to a object with a `belongs_to` association does not automatically save the object.__ It does not save the associated object either. This might seem backwards since the object with `belongs_to` is the one with the foreign key but it's true. You can use either but if you run `teach1.classroom = room1` you must then run `teach1.save` OR `room.save`. Doing so adds the foreign key and then saves both to the database. Let's do it the better way. First a test:   
 
 	> teach1            # notice that `classroom_id` is empty
 	> teach1.classroom  # => nil 
@@ -1078,11 +1109,11 @@ Now let's make the assocation:
 		   (0.2ms)  begin transaction
 		  SQL (0.4ms)  UPDATE "teachers" SET "classroom_id" = ?, "updated_at" = ? WHERE "teachers"."id" = ?  [["classroom_id", 1], ["updated_at", "2016-04-09 04:26:53.364744"], ["id", 1]]
 		   (2.5ms)  commit transaction
-		+----+--------------+------------+-----------+-------------------------+-------------------------+
-		| id | classroom_id | first_name | last_name | created_at              | updated_at              |
-		+----+--------------+------------+-----------+-------------------------+-------------------------+
-		| 1  | 1            | Jeff       | Russ      | 2016-04-08 19:11:38 UTC | 2016-04-09 04:26:53 UTC |
-		+----+--------------+------------+-----------+-------------------------+-------------------------+
+		+----+--------------+------------+-----------+-----------+------------+
+		| id | classroom_id | first_name | last_name | created_at| updated_at |
+		+----+--------------+------------+-----------+---------- +------------+
+		| 1  | 1            | Jeff       | Russ      | 16-04-08  | 16-04-09   |
+		+----+--------------+------------+-----------+-----------+------------+
 		1 row in set
 
 It's pretty obvious that it worked but let's check:  
@@ -1091,7 +1122,8 @@ It's pretty obvious that it worked but let's check:
 	> teach1.classroom  # now it returns the row from classroom table 
 	> room1.teacher     # now it returns the row from teacher table
 	> Teacher.find(1)   # db show `classroom_id` is NOT empty
-	
+
+__Quick edits suggestions for use in development ONLY:__  
 
 If we know the two id's we can actually do the entire thing in one line, without any variables like this, but __beware__ because it has no error handling!!:  
 
@@ -1105,11 +1137,10 @@ Even more extreme, you can do this to each active row in the entire table:
 
 	> Teacher.ids.each {|i| t = Teacher.find(i); t.classroom_id = i; t.save }
 
-__Removing the Association Made__  
+__Removing the Association Made:__  
 
 You can remove the association without removing the actual data by:  
-
-> 
+>
 * `teacher1.classroom_id = nil`  
 * `teacher1.classroom = nil`  
 * `room1.teacher = nil`  
@@ -1121,35 +1152,44 @@ Or we can adapt our previous mass assignment iterator to be a mass unassigner:
 	> Teacher.ids.each {|i| t = Teacher.find(i); t.classroom_id = nil; t.save }
 
 `.delete` in this case will not delete the record, only the foreign key. To destroy the record and remove the association to it:  
-
 >
 * `classroom.teacher.destroy`  
 * `first_teacher.classroom.destroy`  
 
 After `classroom.teacher.destroy` if you then run `classroom.teacher` it still shows it the teacher object, but in frozen state. The frozen state does not last forever though. If you search for classroom again it will be gone.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## One-to-Many Relationships
 
 One-to-many relationships are much more common than one-to-one relationships and are perhaps the most common of the three.  
 
 __As Per Our Classroom Example:__  
 
-You might remember seeing that the the "foreign keys should go on the `courses` tables." and you might have wondered why.  
-
-Think of it this way: if you have a single object attached to many, it makes more sense to have each of the many store the relationship to the single object. Otherwise, the single object would need many foreign keys, one for each of the multiple objects it's related to, each with it's own column. This gets messy and it makes a lot more sense for each of the many to have a single foreign key.  
+You might remember seeing that the the "foreign keys should go on the `courses` tables." and you might have wondered why. Think of it this way: if you have a single object attached to many, it makes more sense to have each on the the "many side" store the relationship to the single object. Otherwise, the single object would need many foreign keys, one for each of the many objects it's related to. Each of these would require an addtional column for the foreign key. This gets messy and it makes a lot more sense for each record the "many side" to have a single foreign key.  
 
 For this reason, we have foreign key on the `courses` table, each pointing to the teacher that `belongs_to` it. To abstract this out of our example, the __foreign key MUST go on the table that__ `belongs_to` __when the thing it belongs to__ `has_many`, similar to what we saw with 1:1, only now it really matters since we are dealing with a `has_many`.
 
 
-__About One-to-Many Relationships__  
-
+__About One-to-Many Relationships:__ 
 >
 * Possibly the most common used of the three
-* Use the plural form of the model symbol in the `has_many` declaraion
-* Used when many things EXCLUSIVELY belong to one thing
+* Use the plural form of the model symbol in the `has_many` declaration
+* Used when an single thing "collects" many things of another type AND
+* When many the many things EXCLUSIVELY belong to one  
 
+__Differences to One-to_One__  
+
+The method name for the model that `has_many` is now plural and it's: 
+
+* assignment with `=` form only takes arrays ( `= [obj1, obj1]`)  
+  * assignment `= [with, array]` __removes all previous association!__  
+* new append operator `<<` pushes one object ( `<< obj1 `)
+  * assignment `<<` adds to previous assocations
+* chain with: `object.others.delete(obj1)` to remove association with obj1
+* chain with: `object.others.destroy(obj1)` to destroy obj2 completely __(NEEDS JOIN?)__
+* chain with: `object.others.clear` to remove all associations
+* chain with: `object.others.size` to return number of associated records
+* chain with: `object.others.empty?` returns `true` if there aren't any 
+* chain with: `object.others.where(id: 1)` further refines the return
 
 ### Updating our Example's One-to-Many Relationships 
 
@@ -1158,30 +1198,58 @@ Remember that our school example has a one-to-many relationship between Teacher 
 > `Teacher` model class `has_many :courses`  
 > `Course` model class `belongs_to :teacher`   
 
-Rails automatically adds methods to the model with `has_many` only this time it's more than with `has_one` since we are working with arrays:  
+Now let's load up our teachers and create some courses:  
 
-	teacher.courses                     # returns array of one or more courses
-	teacher.courses = [course1, course] # specify EVERY course in an array or:  
-	teacher.courses << course           # Ruby's "append op" to add another course
-	teacher.courses.delete(course1)     # remove assocation with course1
-	teacher.courses.destroy(course2)    # destroy course2 from database 
-	teacher.courses.clear               # remove all courses
-	teacher.courses.empty?              # see if array is empty (no courses)
-	teacher.courses.size                # size of array (now many courses)
+	$ rails c
+	> Hirb.enable; teach1 = Teacher.find(1); teach2 = Teacher.find(2); teach3 = Teacher.find(3)
+	> Course.column_names # to remind us => ["id", "teacher_id", "name", "description", ...]
+	> art = Course.new(name: "art", description: "Art")	
+	> art.class
+		=> Course(id: integer, teacher_id: integer, name: string, description: text, created_at: datetime, updated_at: datetime) 
+
+Let's leave `art` unsaved to preform a test. Now let's make a bunch more with `create` using the magic of Ruby's `eval` function which takes Ruby code as a raw string and exectutes it. Here we make a method that iterates over an array of strings and each will be set as the value in the `name:` column. The method will return a hash of all the course objects we created, with the keys being the symbol form of the strings for `name:`. First have a look at the method is a more readable form:  
+
+	def create_courses array
+	  h={}; arr.each do |c|
+	    eval "h[c.to_sym] = Course.create(name: '#{c}')"
+	  end 
+	  return h
+	end
+
+You could actually make this a class method in the `Course` class and then make different ones, each slightly modified for each of the model classes. Or you could just spill it out in one line in `rails c`.
+
+__TIP__ You can always type `ActiveRecord::Base.logger = nil` if you want to silence SQL output from view in the console.  
+
+When we call this method we can use `%w[bio chem debate etc...]` which is shortcut for `["bio", "chem", "debate", etc...]`
+
+	> def create_courses(arr) h={}; arr.each {|c| eval "h[c.to_sym] = Course.create(name: '#{c}')"; }; h; end
+	> c = create_courses %w[bio chem debate english french geography health]
+	>
+	> c[:bio]  # returns the row for bio class
+	> c[:chem] # same, but for chem class
+	> c.values # shows all newly added rows in table
+	> 
+	> c[:bio].description = 'Biology Class'
+	> c[:bio]  # now shows field is filled
+	
+
+This is still a modular approach in that we stored the method for future use, but it makes it be two lines. For a one off you could do:  
+
+	> Course.create! %w(bio chem debate english french geography health).map{|c| {name: c'} }
+
+but you won't be able to access what you just made without getting them out of the database. 
+
+__Fdskla__
+
+	Course.all.each { |r| eval "#{r.name} = Course.find(#{r.id})" }
 
 __Associating Specific Records__
 
-Let's say we alreay have a teacher in the database but no courses. This first part is the same as we saw with one-to-one only the attribute name is plural and the if the attribute is empty it returns and empty array instead of `nil`. If that doesn't make sense look at the comments below:  
+Note that `art` is just a temporary object. We could explicitly `.save` it before assigning it to ateacher but let's see if assignment will also save it. Let's first try mass assignment with `= [an, array]`. Remember from one-to-one, the object with `belongs_to` does not save when assigned to. In this case that's the `Course` object. Based on that, let's assume `Teacher` objects should automatically save and since it's a `has_many` it's the only side that can accept an array anyway so we'll try it out:  
 
-	$ rails console
-	> first_teacher = Teacher.find(1)
-		# you'll see the teacher data
-	> first_teacher.courses # attribute is PLURAL this time and returns ARRAY
-		# you won't get a no method error but you will get and empty array 
-	> chemistry = Course.new(name: "Chemistry", description: "blah blah blah")
-		# you will see id and teacher_id are still nil. It's not saved yet.  
+	> teach1.courses = [art, bio] 
 
-Now let's set the association. This time we aren't just assigning an attribute, we are setting the contents of an array. 
+Now let's set some associations. This time we aren't just assigning an attribute, we are setting the contents of an array. 
 
 	> first_teacher.courses << chemistry
 		# NOTE: just like with one-to-one this actually saves it to the db
@@ -1199,7 +1267,7 @@ Now let's set the association. This time we aren't just assigning an attribute, 
 	> first_teacher.courses
 	  => false
 	  
-__Removing the Association Made__  
+__Removing the Association Made:__ 
 
 You can remove the association without removing the actual data by:
 
@@ -1219,9 +1287,7 @@ will apply to `associated_record`, not `record`.
 	first_teacher.courses.where(name: chemistry)
 
 This would show the data for the chemestry class if we hadn't deleted it.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Many-to-Many with Model-less Joins
 
 In the case of Many-to-many, it's far too complicated to have foreign keys on each of the two tables for the same reasons we saw the `has_many` table not being the suitable table to hold foreign keys, only now the issue has grown to BOTH tables with `has_many`. For this reason we bring in a third table to handle all the relationships. This third table is called __JOIN table__ which will store the __two foreign keys required for each Many-to-many relationship__. Let's refer back to the chart of our school example's associations:  
@@ -1288,10 +1354,7 @@ For this exercise you should have two courses and two students added to your dat
 	> course1.students << student2
 		# now let's use the array assignment way with course2
 	> course2.students = [student1, student2]
-
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Many-to-Many with Modeled Joins
 
 When we associated students to courses all we did was record the fact that the two are linked without any further details about the relationship. In some cases it becomes necessary to record more details about the nature of the association. In our example's Student and Course models, we might want to keep track of what semeseter the student took or is taking the course, their grade, etc. All of this should go in the join table since it's the joins role to keep track of anything relating to both records in relation to each other.  
@@ -1381,7 +1444,7 @@ Now we can run `rake db:migrate` and move on to defining the model files which a
 
 Remember that there is a better way to do this but for the sake of learning we will use the above association methods.  
 
-__REVIST DEFAULT OVERRIDES__  
+__REVIST DEFAULT OVERRIDES:__ 
 
 Note that at this point, no SQL JOIN clause has been run. We simply have a table with two id's and an index.   
 
@@ -1452,7 +1515,7 @@ The solution is to add to a second relation to each of our two outer models whic
 
 Basically what these do is say "we have a relatinship with students/courses that you can find out about if you look at the enrollments table." 
 
-__REVIST DEFAULT OVERRIDES__  
+__REVIST DEFAULT OVERRIDES:__ 
 
 Now if you go to console and query a student or course you will see the SQL has added an __"INNER JOIN."__ Now the following are available:  
 
@@ -1472,7 +1535,7 @@ A lot of what we have done so far in the __rails console__ actually belongs in t
 
 If you keep to the naming conventions with your controller and action names, Rails will generate logical sounding URLs that map to their purpose and the object of their manipulations. 
 
-__Action names and CRUD__  
+__Action names and CRUD:__ 
 
 Remember that the methods in Rails controllers are called "actions" and each usually corresponds to a view. Many of the view's purposes have something to do with the database: one might display a list of students or courses, one might allow a student to sign of for a course and another might allow the schools to create or delete a course from their curriculum.  
 
@@ -1592,8 +1655,7 @@ Notice we didn't type `ClassroomsController` even though that is what results. A
 	    end
 	end
  
- There is a lot in this code that might be foreign to you at this point but the  important takaways are: the order of the actions here follows Rails convention,  the extensive use of `@instance` variables is common for CRUD in the controllers, 
- and the tests `if @classroom.save` and `if @classroom.update(classroom_params)` are used for error handling. Let's cut this file down by deleting the `private`  methods, making the remaining methods be empty and deleting  `before_action :set_classroom, only: [:show, :edit, :update, :destroy]`.  
+ There is a lot in this code that might be foreign to you at this point but the  important takaways are: the order of the actions here follows Rails convention,  the extensive use of `@instance` variables is common for CRUD in the controllers,  and the tests `if @classroom.save` and `if @classroom.update(classroom_params)` are used for error handling. Let's cut this file down by deleting the `private`  methods, making the remaining methods be empty and deleting  `before_action :set_classroom, only: [:show, :edit, :update, :destroy]`.  
  
  
 

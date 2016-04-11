@@ -45,5 +45,8 @@ group :development do
   gem 'spring'
 end
 
+
 # for formated queries in rails c
+gem 'irbtools', require: 'irbtools/binding'
+#gem 'irbtools-more', require: 'irbtools/binding'
 gem 'hirb'

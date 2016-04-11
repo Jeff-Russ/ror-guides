@@ -147,6 +147,7 @@ within the default environment which is development. We can also do
 
 but __BEWARE!__ THis will actually modify the data on your live website's database! 
 
+
 __Rails dbconsole__  
 
 `rails console` will give you access to your database, no matter what lanauges your database uses, in Ruby on Rails syntax. If you are using MySQL, PostgreSQL, SQLite or SQLite3 and would like to access the database in it's own specific interface run:  
@@ -154,6 +155,74 @@ __Rails dbconsole__
 	$ rails dbconsole # or rails db
 
 And Rails figures out which database you're using and drops you into whichever command line interface you would use with it. It will even figure out the command line parameters to give to it.  
+
+### Ruby Console Tricks  
+
+Some tools available in Ruby don't have much use in saved code but they can be pretty usesful in  a Ruby console like `irb` or something based on irb like `rails console`. If you want to see what class an object belongs to can run these and get an array of :symbols:  
+
+	> object.class            # returns class name
+	> Classname.superclass    # shows superclass
+	> "a string".class        #=> String 
+	> String.superclass       #=> Object
+	> String.methods          # shows ALL methods
+	> String.instance_methods # shows all instance methods, including inherited
+	> String.methods(false)   # only non-inherited
+	> String.instance_methods(false) # only non-inherited instance methods
+	
+	# You can also chan `.grep()` at the end of any of those. 
+
+
+
+Methods in Ruby are also objects. Let's take the Ruby class `String` which has a method called `upcase` as an example. Objects created from any class have a method called `method` that takes a :symbol version of a method name as an arugument
+	
+	> class_object = String.new
+	> method_object = class_object.method(:upcase)
+	> method_object.source_location # returns file location where String.new is defined!!!
+	
+As you can see, the object version of a method has a method itselt called `.source_location` which show the file location where object method's method was defined! We could have done the whole thing at once like this: 
+
+	> String.new.method(:upcase).source_location
+	> String.method(:new).source_location
+	
+So how is this useful? In Rails, a lot of your classes have methods added to them by Rails. For example, when working with the database you made Model class called "Model" which inherits from `ActiveRecord::Base`. You'll have a method called `create` but it's not in your code and maybe you want to look at it's definition. 
+
+	> Model.method(:create).source_location
+		=> ["~/.rvm/gems/ruby-2.2.3/gems/activerecord-4.2.6/lib/active_record/persistence.rb", 29]
+	
+We didn't need `.new` in there since `create` is a class method (doesn't need a new object made to be available). Now just copy the path and remember it's "line 29"
+	
+	> exit
+	$ vim ~/.rvm/gems/ruby-2.2.3/gems/activerecord-4.2.6/lib/active_record/persistence.rb
+
+and look at line 29!
+
+### Ruby Console Add-Ons
+
+You might want to consider `irbtools` to get much nicer console formatting. It color codes things and sets `=>` output to the right of what you typed intead of underneath, where it clutters up your console with more lines. There is also the gem `hirb` which let's you view data on your database in an actual table format, like SQL, insead of all in one big line without and visual indication of rows and colums. As of this writing, here is how you install them (be in project root!): 
+
+	$ # install gem for all of Ruby:
+	$ gem install irbtools
+	$ gem install hirb
+	$
+	$ # make it load required file each session: 
+	$ echo "require 'irbtools'" >>  ~/.irbrc  # adds line to irb resource file
+	$ echo "#require 'irbtools/more'" >>  ~/.irbrc # we may uncomment this later
+	$ echo "Hirb.enable" >>  ~/.irbrc # to auto-load the SQL-like formatting
+	$ 
+	$ # add gem and binding for `rails console` (per project basis):
+	$ echo "# for nicer console formating:" >> Gemfile
+	$ echo "gem 'irbtools', require: 'irbtools/binding'" >> Gemfile
+	$ echo "#gem 'irbtools-more', require: 'irbtools/binding'" >> Gemfile
+	$ 
+	$ # add gem for better, SQL-like output from queries (per project basis): 
+	$ echo "# for formated queries in rails c:" >> Gemfile
+	$ echo "gem 'hirb'" >> Gemfile
+	
+
+If you are using a higher version of Ruby, you can use `irbtools-more` which added `did_you_mean` suggestions after receiving invalid input. For this you would uncomment those two lines with `more` and comment the ones without. If you ever want to go back to normal view of database queries in a particular `irb` or `rails console` session you can always type `Hirb.disable` and then to go back type `Hirb.enable`.  
+
+To further unclutter output in the Ruby command lines you might want to silence printout of SQL that gets exectued you can type `ActiveRecord::Base.logger = nil` but beware that you might not notice problems happening without it. 
+
 
 
 §
