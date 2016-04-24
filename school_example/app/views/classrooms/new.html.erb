@@ -1,2 +1,8 @@
-<h1>Classrooms#new</h1>
-<p>Find me in app/views/classrooms/new.html.erb</p>
+<h1>New Classroom</h1>
+<%= form_for(:classroom, action: 'create') do |f| %>
+
+  <%= f.text_field :room_num %>
+  <%= f.text_field :lab_equip  %>
+
+  <%= submit_tag "Create Classroom" %>
+<% end %>

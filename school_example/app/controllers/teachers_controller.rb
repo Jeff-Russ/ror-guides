@@ -4,7 +4,7 @@ class TeachersController < ApplicationController
   end
 
   def show
-    @teachers = Teacher.find(params[:id])
+    @teacher = Teacher.find(params[:id])
   end
 
   def new
@@ -21,4 +21,4 @@ class TeachersController < ApplicationController
   
   def destroy
   end
-  end
+end

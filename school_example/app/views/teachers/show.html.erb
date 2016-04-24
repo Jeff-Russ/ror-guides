@@ -1,9 +1,51 @@
 <%= button_to "<Back", {action: "index"}, {method: :get} %>
 
-<h1>All Teachers</h1>
+<h1>Teacher Info</h1>
 <table border="1">
   <tr>
-    <th></th>
-    <td><%=  %></td>
+    <th>Last Name</th>
+    <th>First Name</th>
+    <th>Room</th>
+    <th>Updated</th>
   </tr>
-</table>
+  <tr><% t = @teacher %>
+    <td><%= t.first_name %></td>
+    <td><%= t.first_name %></td>
+    <td><%= t.classroom.room_num %></td>
+    <td><%= t.updated_at %></td>
+  </tr>
+</table><br><hr><br>
+
+<% @teacher.courses.each.with_index(1) do |c, i| %>
+<table border="1">
+  <tr>
+    <th colspan="4">Course <%= i %>:</th></tr>
+  <tr>
+    <th>Course</th>
+    <th>Description</th>
+    <th>Updated</th>
+  </tr>
+  <tr>
+    <td><%= c.name %></td>
+    <td><%= c.description %></td>
+    <td><%= c.updated_at %></td>
+  </tr>
+  <tr><th colspan="4"><br>Students Enrolled:</th></tr>
+  <tr>
+    <th>Student</th>
+    <th>Grade</th>
+    <th>Elective?</th>
+    <th>Updated</th>
+  </tr>
+  <% c_id = c.id %>
+  <% c.students.each do |s| %>
+  <% e = s.enrollments.where(course_id: c_id).first %>
+  <tr>
+    <td><%= s.last_name %>, <%= s.first_name %></td>
+    <td><%= e.grade %></td>
+    <td><%= e.elective %></td>
+    <td><%= e.updated_at %></td>
+  </tr>
+  <% end %>
+</table><br><hr><br>
+<% end %>

@@ -7,6 +7,7 @@ class ClassroomsController < ApplicationController
   end
 
   def new
+    @classroom = Classroom.new
   end
 
   def edit

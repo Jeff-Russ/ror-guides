@@ -8,8 +8,11 @@
     <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
     <td>
       <%= link_to("Show ", {action: 'show', id: teacher.id}) %>
-      <%= link_to("Edit ", '#') + link_to("Delete", '#') %>
+      <%= link_to("Edit ", {action: 'edit', id: teacher.id}) %>
+      <%= link_to("Delete", '#') %>
     </td>
   </tr>
   <% end %>
 <table>
+
+<%= link_to( "Add new Teacher", {action: 'new'} ) %>

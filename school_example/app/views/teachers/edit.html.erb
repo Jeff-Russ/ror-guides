@@ -1,1 +1,8 @@
-<h1>Editing Teacher</h1>
+<h1>Edit Teacher</h1>
+<%= form_for(:teacher, action: 'create') do |f| %>
+
+  <%= f.text_field :first_name %>
+  <%= f.text_field :last_name  %>
+
+  <%= submit_tag "Update Teacher"  %>
+<% end %>
