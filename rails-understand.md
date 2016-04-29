@@ -1,9 +1,7 @@
 
---------------------------------------------------------------------------------
+________________________________________________________________________________
 # The Rails Architecture
-
---------------------------------------------------------------------------------
-
+________________________________________________________________________________
 ## How Rails Handles Request
 
 The requests first hits the server before anything Rails related hears about it. 
@@ -70,9 +68,7 @@ definition to override default behaivor, that method will render
 
 This is the normal way of handling a request but there are many acceptions. As 
 we will see soon.  
-§
-
---------------------------------------------------------------------------------
+________________________________________________________________________________
 ## Command Line Tools For Rails
 
 Rails was build for development on Unix and Linux machines and makes extensive 
@@ -223,12 +219,8 @@ If you are using a higher version of Ruby, you can use `irbtools-more` which add
 
 To further unclutter output in the Ruby command lines you might want to silence printout of SQL that gets exectued you can type `ActiveRecord::Base.logger = nil` but beware that you might not notice problems happening without it. 
 
-
-
-§
-
---------------------------------------------------------------------------------
-## URL Routing 
+________________________________________________________________________________
+## URL Routing with routes.rb
 
 These are just three of them:
 
@@ -241,7 +233,7 @@ Note that routes are processed in the order that they appear in routes.rb.
 Generally, best practice dictates that you put specific things on top and 
 catch-alls like the root route on the bottom. 
 
-__Simple ( aka Match) Route__  
+### Simple ( aka Match) Route  
 
 When you put in routes.rb: 
 
@@ -256,14 +248,14 @@ this is a simple route and it's actually shorthand for:
 The long version shows us that Rails is matching the string in the url to another 
 string which represents the controller action pair and does this for GET requests. 
 The two strings do not need to be exactly the same but when they are, the shorthand 
-is available.
+is available.  
 
-__Default Route__  
+### Default Route  
 
 The Simple route handles a single, explicitly defined string url but often we want 
 to target a number of requests without naming them all individually. 
 
-Such is the case with Default Routes. A default route follows the form:
+When all of these actions are dedicated to HTTP `GET` requests (they all are meant to "ask for" a view in the form of an HTML reply) you have a case for using Rails "Default Routes". A default route follows the form:
 
 > :controller/:action/:id
 
@@ -296,7 +288,7 @@ bad practice.
 Remember that, since default routes are a sort of catch-all, they should be 
 placed lower on the routes.rb document!
 
-__Root Route__  
+### Root Route  
 
 The Root Route simply defines what to do when the site's root url gets a request:
 
@@ -306,10 +298,46 @@ We now have a shorthand which is:
 
     root "demo#index"
 
-note that these use the `#` sign and not the `/` as is the case with simple routes.  
+note that these use the `#` sign and not the `/` as is the case with simple routes. 
 
-§  
+### Resource Routes 
 
---------------------------------------------------------------------------------
+There are a list of standard action names when dealing with a database which are called __CRUD (Create Read Update Delete)__ actions. The problem with using a default route as a shorthand for them is that these are not just `GET` requests they are all sorts. In routes.rb we have a method called `resources` which takes a symbol for of the controller name and looks for all actions in it that follow Rails naming conventions for "CRUD actions". It knows what to do with each one, handling each one differently.  
 
+	resources :users 
+	
+This will make more sense if you understand how Rails interacts with data in the the database but, in a nutshell, the above will generate URL paths for all the basic operations you would do with users on a website: creating, displaying, modifying and deleting users.  
+________________________________________________________________________________
+## Rails Route Helpers
+
+
+Each route has a URL that is typically `"/controllername/actionname"` and you could access them simply with strings like that but Rails give you something helper methods that return this string.  The the main reason you would want to use them is that they are safer. URL's change but the structure of your controllers tends to stay the same. If the actual URL path changes, the helper name will return the new path. These helper names are generated based on the contents of `routes.rb`. After you have that file set up, go to your terminal and type:  
+
+	$ rake routes
+	
+If you had a controller called `ctrlname` and action names like `index`, `show`, etc, you will see something like this:  
+
+	          Prefix Verb URI Pattern                            Controller#Action
+	  ctrlname_index GET  /ctrlname/index(.:format)              ctrlname#index
+	   ctrlname_show GET  /ctrlname/show(.:format)               ctrlname#show
+	    ctrlname_new GET  /ctrlname/new(.:format)                ctrlname#new
+	   ctrlname_edit GET  /ctrlname/edit(.:format)               ctrlname#edit
+	 ctrlname_create GET  /ctrlname/create(.:format)             ctrlname#create
+	ctrlname_destroy GET  /ctrlname/destroy(.:format)            ctrlname#destroy
+	            root GET  /                                      pages#home
+	                 GET  /:controller(/:action(/:id))(.:format) :controller#:action
+
+Add `_path` at the end of any of the __Prefix__es listed above and you have the helper name. For example: `ctrlname_index_path` returns `"/ctrlname/index"` which is handled by the `index` method (action) defined in the `CtrlnameController` class. `root_path` returns `"/"` which is handled by the `home` method (action) in the `PagesController` class. You can test these out in the Rails Console:  
+
+	$ Rails console
+	> # enter this to make the helpers available in the console: 
+	> include Rails.application.routes.url_helpers 
+	> 
+	> ctrlname_index_path # returns "/ctrlname/index"
+	> root_path           # returns "/"
+	
+
+
+
+________________________________________________________________________________
 # MVC: View and Controller 

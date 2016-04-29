@@ -1,9 +1,11 @@
+
+
 ________________________________________________________________________________
 # MVC: Models and the Database
 ________________________________________________________________________________
 ## Creating and Configuring Database
 
-__Creating a Database:__ 
+__Creating a Database Directly (example):__ 
 
 Let's go over how to create a database. You should know how to do this not just from within Rails using the Rails command but also according to how it would be 
 done without Rails. In mySQL: 
@@ -386,6 +388,12 @@ Sometimes you might have legacy code that does not follow naming conventions, or
 	self.table_name = "new_name"
 
 And with that it will be fixed. Of course you could also just rename the model.rb file and the classname within it.  
+
+__Various Techniques__  
+
+You can try to delete a table directly in Rails console:  
+
+	> drop_table :table_name
 ________________________________________________________________________________
 # Introducing Our Example Database
 ________________________________________________________________________________
@@ -593,7 +601,7 @@ __STUDENT model/migration__
 
 	$ rails g model Student first_name:string last_name:string
 ________________________________________________________________________________
-# CRUDing Records with ActiveRecord
+# Basic Interactions with Data
 ________________________________________________________________________________
 
 The following examples will be show in the __rails console__ since it gives us some nice feedback on what we're doing but keep in mind that the same syntax is valid in Ruby code elsewhere. Also not that, contrary to methods given to us in ARel, perform their action immediately. 
@@ -626,7 +634,7 @@ __Model.create__
 
 We used mass assignment with the `new` method, which then requires us to run `save` but we have another option of using `create` instead of `new`, which does not require `save` afterward. Unlike `save`, `create` does not return a boolean, it returns the object just like `new` does so we'll need to find out if it was successful by other means.  
 
-	> teacher3 = Teacher.create(first_name:"Yukihiro", last_name:"Matsumoto")
+	> teacher3 = Teacher.create(first_name: "Yukihiro", last_name: "Matsumoto")
 
 Note that these three object we created are only temporary variables in our current `rails console` session and do not represent data actually on the database. If we restart the console they will be gone:  
 
@@ -742,7 +750,7 @@ You can also delete the entire contents of a table with:
 	> ModelName.destroy_all # checks dependencies and callbacks first
 	
 ________________________________________________________________________________
-# Database Finders & Queries  
+# Finders & Queries  
 ________________________________________________________________________________
 
 Most of your interaction with the database via Rails will actually be queries (reading data, not writing). For that reason, Rails provides more than one way to do this.  
@@ -770,7 +778,7 @@ ________________________________________________________________________________
 
 As you already know, ARel queries wait until they are needed before actually being performed. __Query Methods__ don't return an array like ActiveRecord does, they return an __Relation Object__, which can then be chained together with other query methods and when you are done, Active Relation will take them all and construct one big SQL statement. This way it's much more efficient.  
 
-### The \`where\` Query Method  
+### The .where Query Method  
 
 `where` is one such query method and is named after the SQL `WHERE` clause it generates. If you execute this in the  __Rails Console__, you will actually see the resulting SQL printing back to you even though it wasn't run in the database yet. 
 
@@ -866,25 +874,23 @@ This will find all pro users and sort them in ascending order by name as it appe
 ________________________________________________________________________________
 ## Custom Queries with Named Scopes
 
-So far we have interacted with the database with methods provided to us by the Rails Framework. We didn't need add any functionality to our Models in order to perform these queries and other CRUD operations. We also have __Named Scopes__, which allow us to define custom queries in our models using multiple __Active Relation query methods__. Our resulting __Named Scopes__ can be called taking arguments just like pre-existing Rails methods. Prior to Rails 4, __Lamda Syntax__ was option in them but now it's required.  
+So far we have interacted with the database with methods provided to us by the Rails Framework. We didn't need add any functionality to our Models in order to perform these queries and other CRUD operations. You may eventually notice you have had a certain set of query habits that were routinely performed over and over again. It would make sense to save these into nice small units that encapsulate them.  
 
-This is roughly how you define a scope in your model:
+Rails has __Named Scopes__ which allow us to define custom queries in our models using multiple __Active Relation query methods__. Our resulting __Named Scopes__ can be called taking arguments just like they're built in Rails methods.  
 
-	scope :name_of_scope, lambda { where(active: true) }
+Prior to Rails 4, __Lamda Syntax__ was optional way to define them but now it's required. This is roughly how you define a scope in your model and are usally placed before any method `def` blocks.:  
 
-Scopes are placed in your Model file class and most people put them before any method `def` blocks.   
+	scope :name_of_scope, lambda { where(active: true) } # normal lamda syntax
+	# OR... 
+	scope :name_of_scope, -> { where(active: true) }     # "Stabby Lambda" syntax
 
-You can use __"Stabby Lambda Syntax__, but be aware there are actually some subtle implementation differences so we won't be using this:  
+You can use __"Stabby Lambda Syntax__, but be aware there are actually some subtle implementation differences so we won't be using them. The reason why lambda syntax is now required is that lambda are evaluated when they are called and not when they are defined. This matters when you use things like `Time.now` since you want that to be evaluated each time the lambda is called. This created a lot of errors and confusion to lambdas were made a requirement.   
 
-	scope :name_of_scope, -> { where(active: true) }
-
-Be aware that these both are really identical to just creating a class method like below. They are just a little nicer syntax to work with.
+Both are really just the same as creating a class method like below. They are just a little nicer syntax to work with.
 
 	def ModelName.name_of_scope
 	  where(activ: true )
-	end
-
-The reason why lambda syntax is now required is that lambda are evaluated when they are called and not when they are defined. This matters when you use things like `Time.now` since you want that to be evaluated each time the lambda is called. This created a lot of errors and confusion to lambdas were made a requirement.   
+	end  
 	
 __Named Scopes Taking Arguments:__ 
 
@@ -896,7 +902,7 @@ This would be called like: `User.account('pro')`
 
 __Named Scoped can be chained when they are called__ and can also have chainging within them, making for some really compacted sytax that would otherwise be a quite verbose set of queries.   
 ________________________________________________________________________________
-## Rails Console Query Output Formatting
+## Extra: Query Output Formatting in Console
 
 If you have done queries directly in SQL you'll know that the format of the output is much better than we see with ActiveRecord in the rails console. Although not necessary, it might be nicer and easier to read if we can get a more formatted output from the rails console. One, non invasive, option is to ask for YAML output with a `y`:  
 
@@ -935,15 +941,19 @@ For a SQL-like format, you can use the hirb gem by cldwalker:
 	3 rows in set
 
 Much easier to read! 
+
+DOES NOT WORK### Viewing the Entire DB in Console
+DOES NOT WORK
+DOES NOT WORK	> Rails.application.eager_load! # required on dev env to load everything
+DOES NOT WORK	> ar = ActiveRecord::Base.descendants # array of all: Classroom, Teacher, etc.
+DOES NOT WORK	> ar.each_index { |i| m = eval "#{ar[i].name}"; eval "#{m}.all" }
 ________________________________________________________________________________
-# Database Associations
+# Associations
 ________________________________________________________________________________
 
 Relational databases make it easy to link tables together using __foreign keys__ and __joins__. If you want to work with data in related tables you could go about that by looking at a record's foreign key and then finding the related data by making a second query to to the related table but this is a bit tedious. It would be best if our Ruby side of things had prior knowledge about the relationships between tables and in fact it does. __ActiveRecord__ has what it calls __associations__ that are used to define relationships between data in separate tables.  
 ________________________________________________________________________________
 ## Associations In Our Example 
-
-__INSERT STUFF__
 
 Let's first look at how the relationships are conceived of in RDBMS and in Rails. There are three main __types of data model relationships__:  
 >
@@ -1020,7 +1030,6 @@ __To Sumarize:__
 * use one-to-one to break up tables or...  
 * to reject the possibility of additional assocations or..   
 * use one-to-one to help with frequent queries performance  
-
 
 __Remember to reload console after changing association methods!__ When you do this you will see that objects created from the models actually had new methods magically added to them behind the scenes. Take this as a premise:  
 
@@ -1239,9 +1248,6 @@ This is still a modular approach in that we stored the method for future use, bu
 
 but you won't be able to access what you just made without getting them out of the database. 
 
-__Fdskla__
-
-	Course.all.each { |r| eval "#{r.name} = Course.find(#{r.id})" }
 
 __Associating Specific Records__
 
@@ -1341,7 +1347,6 @@ Now we need to create three things: the two foreign keys, which are integer id's
 
 Notice that the second argument for `add_index` is now an array since we are dealing with two id's. This migration file is now complete and we can run `$ rake db:migrate` to create the join table. 
 
-__ADD HERE overriding of :class_name in model and join table's name in model these go after assocation methods__
 
 Note that at this point, no SQL JOIN clause has been run. We simply have a table with two id's and an index.   
 
@@ -1371,7 +1376,7 @@ Be aware that there is a better way to do this but for the sake of learning we w
 
 __Keys in Join Models__
 
-Our join will still have two foreign keys but now that __we have a model for it we must have a primary key and id__ because we will be performing CRUD operations on it and they should be fast and efficient!  
+Our join will still have two foreign keys but now that __we have a model for it we must have primary key and index colums!__ ActiveRecord needs primary keys to access table data and we add the index because we will be performing CRUD operations on it and they should be fast and efficient!  
 
 __Naming Join Models__
 
@@ -1381,21 +1386,11 @@ __Associations In Models that use a Modeled Join__
 
 Also, __now that our join has a defined model, we need to have the two associated models it joins point to the join rather than each other.__  
 
-### Updating our Example with a Join Model 
+### Replacing Our Join with a Modeled Join 
 
-First let's drop the join table we have now:
+We will use a JOIN table with the name `enrollments` instead of `courses_students`. If we already have a lot of data in `courses_students` we might not want to simply drop the table and make a new one. But for the sake of understanding Join Models without this complications, here are instructions for doing this destructively first, followed by a more surgical approach in __Moving our Data to a Modeled Join Table__.   
 
-	$ rails g migration DropCoursesStudentsJoin
-
-Now rename the class and make `change` look like: 
-
-	class DropCoursesStudents < ActiveRecord::Migration
-	  def change
-	    drop_table :courses_students
-	  end
-	end
-
-You can run `rake db:migrate` now or wait until we have this new addition:  
+__Generating New Join Table__
 
 	rails g model Enrollment
 
@@ -1415,42 +1410,105 @@ Let's add the two foreign keys and one index for both of them:
 	class CreateEnrollments < ActiveRecord::Migration
 	  def change
 	    create_table :enrollments do |t|
-	      t.references :course
-	      t.references :student
+	      t.references :course, index: true
+	      t.references :student, index: true
 	      
 	      t.timestamps
 	    end
-	    add_index :enrollments, ["course_id", "student_id "]
 	  end
 	end
 
 A couple of things to note: unlike the model-less join, we do not need to add `id: false`. We need a primary key so we'll let the default take over. Also note that, since we used `t.references` instead of `t.integer`, we can leave off the `_id` at the end. We used an array to handle the two foreign keys at once.  
 
-At this point we don't have any functionality that we lacked in the model-less join. Let's add the student's grade in the course, right before `timestamps`:   
+### Moving our Data to a Modeled Join Table
+
+__Accessing Model-less Table with SQL__
+
+Let's first look at the details of how the two JOIN tables differ so we can see how we might be able to move the data to corresponding columns. Normally we would be able to inspect the old Join table via it's model (`ModelName.column_names`). This won't work but `ActiveRecord::Base.connection.tables` shows the table exists. We could look at the tables using raw SQL in `rails db` or insert SQL in `rails console` with `ActiveRecord::Base.connection.execute("SQL query")`. Here is some useful SQL:  
+
+>* `SELECT * FROM table_name;` show all tables 
+>* `DESCRIBE tablename;` in MySQL  
+>* `.schema tablename;` in SQLite  
+>* `PRAGMA table_info(tablename);` should work in most SQL based DBs  
+
+If you do some research you will find that both tables have: `"course_id" integer, "student_id" integer` which is where the data is held. The index names are different since the contain the name of the Join table in their name:  
+
+	CREATE INDEX "index_courses_students_on_course_id_and_student_id" 
+		ON "courses_students" ("course_id", "student_id")
+vs 
+
+	CREATE INDEX "index_enrollments_on_course_id" ON "enrollments" ("course_id")
+	CREATE INDEX "index_enrollments_on_student_id" ON "enrollments" ("student_id")
+
+Also, The model-less table lacked the timestamps and the primary key which was defined `"id" INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL`. None of the differences should effect us since the actual data sits in identically named columns. If all of this is making your head spin you might consider using some graphical database browser application. 
+
+__Accessing Model-less Table by Making Model For It__  
+
+Not having a model certainly deprives us from many of the useful functionalities provided by Rails so why not try to create a model for this pre-existing table? Armed with knowledge on how Rails links code via it's naming conventions we can manually create the file `app/models/courses_student.rb` and define it with `class CoursesStudent < ActiveRecord::Base end`. Of course it's singular but what you might find odd is that the class name is `CoursesStudent` and not `CourseStudent`. The file name doesn't matter as much. No go into `rails c`:  
+
+	> Rails.application.eager_load!
+	> CoursesStudent.column_names #=> ["course_id", "student_id"]
+
+Success! It knew the schema of the `courses_students` table. Let's get this intersection of columns name (`["course_id", "student_id"]`) in an array variable and then interate over all the data, creating new rows in the new Join:     
+
+	> columns = (CoursesStudent.column_names & Enrollment.column_names) - ["id"] 
+	> Enrollment.create( CoursesStudent.all(:select => columns.join(",") ).map(&:attributes) )
+
+If that last line doesn't work you can just run `Enrollment.create( CoursesStudent.all.map(&:attributes) )` because we have no columns to omit from the source table. 
+
+### Finalizing Change and Adding to Join
+
+__Deleting Old Join Table__  
+
+Now we can delete our old table  
+
+	$ rails g migration DropCoursesStudentsJoin
+
+Now make `change` look like: 
+
+	class DropCoursesStudentsJoin < ActiveRecord::Migration
+	  def change
+	    drop_table :courses_students
+	  end
+	end
+
+You can run `rake db:migrate` now or wait until we have the new addition and have transferred the data.
+
+__Adding to Join Table__  
+
+At this point we don't have any functionality that we lacked in the model-less join. Let's add the student's grade in the course. Run `$ rails g migration AddGradesToEnrollments` This is how we would add our additions if this were a `create_table` method:  
 
 	t.decimal :grade, precision: 5, scale: 2
-
-We used `decimal` because it has fixed precision and is not floating point. `:scale` determines the number of digits after the decimal point and `:precision` determins the total number of digits. Now let's add something to show if the course is an elective or required:  
-
 	t.boolean :elective, default: false
 
-Now we can run `rake db:migrate` and move on to defining the model files which are empty classes at the moment. Add the following:  
+but we need to use `add_column(table_name, column_name, type, options = {})`  
+
+    add_column :enrollments, :grade, :decimal, {precision: 5, scale: 2}
+    add_column :enrollments, :elective, :boolean, default: false
+
+Note that Rails is smart enough to know that `precision: 5, scale: 2` is actually `{precision: 5, scale: 2}` if you had notated it that way. 
+
+We used `decimal` for grades because it has fixed precision and is not floating point. `:scale` determines the number of digits after the decimal point and `:precision` determins the total number of digits. `elective` indicated wheather the course is an elective or required:  
+
+Now we can run `rake db:migrate` and move on to defining the model files which are empty classes at the moment. If you want, you can first check `Enrollment.all` to see if the columns were added. Next add the following (Remember that there is a better way to do this but for the sake of learning we will use the above association methods.):   
 
 >`Course` model class `has_many :enrollments`   
 >`Student` model class `has_many :enrollments` 
->`Enrollment` model class `belongs_to :courses`
->`Enrollment` also should `belongs_to :students`
-
-
-Remember that there is a better way to do this but for the sake of learning we will use the above association methods.  
-
-__REVIST DEFAULT OVERRIDES:__ 
+>`Enrollment` model class `belongs_to :course` not plural!
+>`Enrollment` also should `belongs_to :student` not plural!
 
 Note that at this point, no SQL JOIN clause has been run. We simply have a table with two id's and an index.   
 
-__Associating Specific Records__
+### Associating Specific Records  
 
-For this exercise you should have two courses and two students added to your database. You would do this the same way as you would with any other table with a Rails model. We have to handle the joins differently now that we have a model for the join table. Let's say a student visits the registrar and says he needs and elective. The student is looked up and `student1` is made. The desired course is looked up and `course1` is made, then:  
+For this exercise you should have two courses and two students added to your database. For even more students you can run:  
+
+	f = %w[Rhianna Shannon Marion Nigel Daniel Charlotte Harold Walt Audrey]
+	l = %w[Hill Stringer Todd Michaels Hermanson David Ellis Lowell Putnam] 
+	9.times { |i| Student.create(first_name: f[i], last_name: l[i]) }
+
+
+You would do this the same way as you would with any other table with a Rails model. We have to handle the joins differently now that we have a model for the join table. Let's say a student visits the registrar and says he needs and elective. The student is looked up and `student1` is made. The desired course is looked up and `course1` is made, then:  
 
 	$ rails console
 	> student1.enrollments  # shows no courses. same for student2
@@ -1495,11 +1553,14 @@ Now the objects are updated to the new state of the database.
 
 ### Traversing our Example with a Join Model
 
-Before if we wanted to get a student's associated course data we could run `a_course.students` and get an array. We can't do that now since courses has no direct relationship with students and visa-versa. They instead both have a relationship with `enrollments` and we must go to this join to get the other table's associated data like this:  
+Before if we wanted to get a student's associated course data we could run `a_course.students` and get an array. We can't do that now since courses has no direct relationship with students and visa-versa. They instead both have a relationship with `enrollments` Enter `a_course.enrollments` to see the portion of the enrollments table pertaining to that class. This shows the `student_id` data but not the student record in detail.
 
-	a_student.enrollments.map { |e| e.students } 
-	
-This goes through each enrollment to look up it's students and returns the same array. This is not only more of a pain, it's also results in not very efficient SQL. We want to be able to simple call `a_course.students` and have it __traverse__ the join. To do this, we must tell ActiveRecord about this outer relationship between courses and students. Do to this we use the `:through` hash with our `has_many` declarations.  
+	> a_course = Course.find(1)
+	> a_course.enrollments     # shows portion of enrollments table
+	> enrolled_students = a_course.enrollments
+	> enrolled_students[1] # shows second student on portion of enrollments table
+
+Going through each enrollment to look up it's students and returns the same array. This is not only more of a pain, it's also results in not very efficient SQL. We want to be able to simple call `a_course.students` and have it __traverse__ the join. To do this, we must tell ActiveRecord about this outer relationship between courses and students. Do to this we use the `:through` hash with our `has_many` declarations.  
 
 ### INNER JOIN: __has_many__ with __:through__
 
@@ -1515,8 +1576,6 @@ The solution is to add to a second relation to each of our two outer models whic
 
 Basically what these do is say "we have a relatinship with students/courses that you can find out about if you look at the enrollments table." 
 
-__REVIST DEFAULT OVERRIDES:__ 
-
 Now if you go to console and query a student or course you will see the SQL has added an __"INNER JOIN."__ Now the following are available:  
 
 	> student1.courses
@@ -1526,12 +1585,36 @@ Now if you go to console and query a student or course you will see the SQL has 
 		
 and show the other tables data by __"traversing the INNER JOIN."__ This is easier and more efficient but be aware that it's __not exactly the same as a direct assocation in some cases.__ We can use `<<` to add students and courses to each other but __if the INNNER JOIN has required fields we can't sucessfully save the record without adding to the JOIN directly.__ for this reason, you might want to do everything via an object from the JOIN when creating a record and then you can use the way possible with `:through` for modifying existing records. 
 
-## CRUD with Controller Actions and Views
+________________________________________________________________________________
+## Overriding Default Names with Associations
 
+__Replacing Model Names__  
+
+In real life, people places and things have multiple roles and are named differently according to those changing roles. For example, a "person" becomes a "lawyer" in assocation with "law firm" and then becomes "husband" in relation to "wife" who is hopefully also a "person." In our example teachers might also be "guidance counselor" or "football coach" after school hours. It would make sense for our association methods to reflect this; a FootballTeam model wouldn't make sense if it had a "teacher" method.  
+
+We won't actually add any of this to our database but if we were to do so, the FootballTeam model class would show something like this:  
+
+	belongs_to :coach, class_name: "Teacher"
+
+Unless we have a `coach_id` foreign key on the associated table, we'll need to specify what the foreign key is:  
+
+	belongs_to :coach, class_name: "Teacher", foreign_key: "teacher_id"
+ 
+__Replacing Join Names__  
+
+If you don't have a model for a Join table, it must be named `table1_table1`. But, as we saw in our example, we often want to give it a more descriptive name, like `enrollments` instead of `courses_students`. This is, of course, possible when you have a Model for the Join but when you don't you sill have a way to override the way it's accessed by the two associated models. In the Course model class you would put: 
+
+	has_and_belongs_to_many :students, join_table: "courses_students"
+
+
+________________________________________________________________________________
+# Introduction CRUD in Rails Apps
+________________________________________________________________________________
 
 A lot of what we have done so far in the __rails console__ actually belongs in the controllers where the views can interact with them. 
 
-### CRUD Naming Conventions in Rails  
+________________________________________________________________________________
+## CRUD Naming Conventions in Rails  
 
 If you keep to the naming conventions with your controller and action names, Rails will generate logical sounding URLs that map to their purpose and the object of their manipulations. 
 
@@ -1562,105 +1645,1137 @@ All of these are meant to display a form before modification takes place, with t
 
 A frequent practice is to place the standard CRUD actions in each controller in the following order: `index`, `show`, `new`, `edit`, `create`, `update` and `destroy` (omitting `delete`). You don't have to follow this order but since they are public methods they must be placed before private or protected method in the controller in order to work. 
 
+
+
 __Controller names and CRUD__  
 
 Where action names roughly map out to CRUD operations and Rails ActiveRecord names, controller names should refer to the database model names they work on. They should be __PLURAL__ and will often be one model per controller:    
 
 > `ClassroomsController TeachersController CoursesController StudentsController`
+________________________________________________________________________________
+## Generating CRUD Controller/Actions/Views
 
-### Generating Controller/Actions/Views for CRUD
+We should start off by makeing a controller for Teachers since it can pivot to two sides: classrooms and courese. A classrooms controller wouldn't really have as much to CRUD. Probably the prefered way to get started is to use the generate command and list the actions desired. Let's make a controller for the Teacher model:  
 
-Probably the prefered way to get started is to use the generate command and list the actions desired. Let's make a controller for the Classroom model:  
-
-	$ rails generate controller Classrooms index show new edit create destroy
+	$ rails generate controller Teachers index show new edit create destroy
 	
-Notice we didn't type `ClassroomsController` even though that is what results. Also notice the order of the actions. There is in recent Rails a shortcut to generate this but it will often give you more than you need:  
+Notice we didn't type `TeachersController` even though that is what results. Also note that, unlike the model name, the controller name is plural. Lastly, notice the order of the actions. There is in recent Rails a shortcut to generate this but it will often give you more than you need:  
 
-	$ rails g scaffold_controller Classrooms 
+	$ rails g scaffold_controller Teachers 
 	
-`scaffold_controller`, in this case, will generate the following, only with more whitespace which was deleted for this guide:    
+`scaffold_controller`, in this case, will generate the following: 
 
-	class ClassroomsController < ApplicationController
-	  before_action :set_classroom, only: [:show, :edit, :update, :destroy]
+	class TeachersController < ApplicationController
+	  before_action :set_teacher, only: [:show, :edit, :update, :destroy]
 	
-	  # GET /classrooms
-	  # GET /classrooms.json
+	  # GET /teachers
+	  # GET /teachers.json
 	  def index
-	    @classrooms = Classroom.all
+	    @teachers = Teacher.all
 	  end
 	
-	  # GET /classrooms/1
-	  # GET /classrooms/1.json
+	  # GET /teachers/1
+	  # GET /teachers/1.json
 	  def show
 	  end
 	
-	  # GET /classrooms/new
+	  # GET /teachers/new
 	  def new
-	    @classroom = Classroom.new
+	    @teacher = Teacher.new
 	  end
 	
-	  # GET /classrooms/1/edit
+	  # GET /teachers/1/edit
 	  def edit
 	  end
 	
-	  # POST /classrooms
-	  # POST /classrooms.json
+	  # POST /teachers
+	  # POST /teachers.json
 	  def create
-	    @classroom = Classroom.new(classroom_params)
+	    @teacher = Teacher.new(teacher_params)
 	
 	    respond_to do |format|
-	      if @classroom.save
-	        format.html { redirect_to @classroom, notice: 'Classroom was successfully created.' }
-	        format.json { render :show, status: :created, location: @classroom }
+	      if @teacher.save
+	        format.html { redirect_to @teacher, notice: 'Teacher was successfully created.' }
+	        format.json { render :show, status: :created, location: @teacher }
 	      else
 	        format.html { render :new }
-	        format.json { render json: @classroom.errors, status: :unprocessable_entity }
+	        format.json { render json: @teacher.errors, status: :unprocessable_entity }
 	      end
 	    end
 	  end
 	
-	  # PATCH/PUT /classrooms/1
-	  # PATCH/PUT /classrooms/1.json
+	  # PATCH/PUT /teachers/1
+	  # PATCH/PUT /teachers/1.json
 	  def update
 	    respond_to do |format|
-	      if @classroom.update(classroom_params)
-	        format.html { redirect_to @classroom, notice: 'Classroom was successfully updated.' }
-	        format.json { render :show, status: :ok, location: @classroom }
+	      if @teacher.update(teacher_params)
+	        format.html { redirect_to @teacher, notice: 'Teacher was successfully updated.' }
+	        format.json { render :show, status: :ok, location: @teacher }
 	      else
 	        format.html { render :edit }
-	        format.json { render json: @classroom.errors, status: :unprocessable_entity }
+	        format.json { render json: @teacher.errors, status: :unprocessable_entity }
 	      end
 	    end
 	  end
 	
-	  # DELETE /classrooms/1
-	  # DELETE /classrooms/1.json
+	  # DELETE /teachers/1
+	  # DELETE /teachers/1.json
 	  def destroy
-	    @classroom.destroy
+	    @teacher.destroy
 	    respond_to do |format|
-	      format.html { redirect_to classrooms_url, notice: 'Classroom was successfully destroyed.' }
+	      format.html { redirect_to teachers_url, notice: 'Teacher was successfully destroyed.' }
 	      format.json { head :no_content }
 	    end
 	  end
 	
 	  private
 	    # Use callbacks to share common setup or constraints between actions.
-	    def set_classroom
-	      @classroom = Classroom.find(params[:id])
+	    def set_teacher
+	      @teacher = Teacher.find(params[:id])
 	    end
 	
 	    # Never trust parameters from the scary internet, only allow the white list through.
-	    def classroom_params
-	      params.fetch(:classroom, {})
+	    def teacher_params
+	      params.fetch(:teacher, {})
 	    end
 	end
  
- There is a lot in this code that might be foreign to you at this point but the  important takaways are: the order of the actions here follows Rails convention,  the extensive use of `@instance` variables is common for CRUD in the controllers,  and the tests `if @classroom.save` and `if @classroom.update(classroom_params)` are used for error handling. Let's cut this file down by deleting the `private`  methods, making the remaining methods be empty and deleting  `before_action :set_classroom, only: [:show, :edit, :update, :destroy]`.  
- 
- 
+There is a lot in this code that might be foreign to you at this point but the important takaways are: the order of the actions here follows Rails convention, the extensive use of `@instance` variables is common for CRUD in the controllers, and the tests `if @teacher.save` and `if @teacher.update(teacher_params)` are used for error handling.
 
+The primary duties carried out in CRUD method defintitions are:  
  
+>* Making `@instance_variables` (set from results of db queries) available to erb view files
+>* Getting back `@instance_variables` from the erb view files and saving them to the db
+>* Implementing error handing around the saving of records, with a course of action if failed 
+
+It's important to realize that __not all actions have views__. In other words, not all HTTP interactions are GET requests, some are responses from the client. When a user fills out a form and hits submit, the server is not directly asked to "get" anything. It's expected to process the response and THEN possibly provide the user with a fresh view or notice of some sort. When Rails get's a response, it still goes to an action sitting in a controller only it's one meant for handling a response. The difference is that after this action processes the response it might have multiple possible conclusions i.e. a redirect to a "success page" or, in the case of problem, a redirect back to the form, asking the user to fill it out again.  
+
+You can see from our generated controller that there is code outside of any method defintion at the top of our controller class. These are called __BEFORE ACTIONS__ and are provide some other important features to the methods. They used to be called `before_filter`s, which is perhaps more telling: they are used to filter (limit) the interaction with the database based on some variable such as which user is logged in or some other aspect of their record in the database. For example, `before_action` could be used to not include certain elements on the page which are only provided to teachers, such as the ability to edit a biography.      
+
+Let's cut this generated file down by deleting the `private`  methods, making the remaining methods be empty and deleting `before_action :set_teacher, only: [:show, :edit, :update, :destroy]`:  
+
+	class TeachersController < ApplicationController
+	  def index
+	  end
+
+	  def show
+	  end
+
+	  def new
+	  end
+
+	  def edit
+	  end
+
+	  def create
+	  end
+	
+	  def update
+	  end
+	  
+	  def destroy
+	  end
+	end
+	
+This are the typical 7 methods, in their customary order. It might be a good idea to memorize this, as you most often would run something like:  
+
+	$ rails generate controller ControllerName index show new edit create destroy
+________________________________________________________________________________
+## CRUD Routes & RESTful Routes Sneak Peak
+
+If we relied on rails "default routes":  
+
+    match ':controller(/:action(/:id))', :via => :get
+    
+run `rake routes` and see: 
+
+	Prefix Verb URI Pattern                            Controller#Action
+	  root GET  /                                      pages#home
+	       GET  /:controller(/:action(/:id))(.:format) :controller#:action
+
+To handle our CRUD methods we would end up with each action having a `GET` request for every action. This does not make sense for CRUD since many of the actions not `GET` requests.
+
+### Generating CRUD Routes with "default routes"
+
+One solution is simply to change it to:  
+
+    match ':controller(/:action(/:id))', :via => [:get, :post]
+
+run `rake routes` and see: 
+
+	Prefix Verb     URI Pattern                            Controller#Action
+	  root GET      /                                      pages#home
+	       GET|POST /:controller(/:action(/:id))(.:format) :controller#:action
+
+This means that for any action there is a valid route for both a GET request and a POST request. If you refer back to the CRUD chart you'll see that only some actions have POST requests. Also, some have POST but no GET and some have other verbs altogether!  
+
+Although there is a more taylored solution which would be to use the `resources` method as we will see next, using default routes can still work. The actual HTTP verb being sent is really just a formality, Rails can process any request anyway it likes. Rails can use the URL and "query string parameters" (the stuff in the URL after `/?`) to determine which action to trigger and the action can perform the duties of any CRUD operation.  
+
+In fact, most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates. HTML forms (up to HTML version 4 and XHTML 1) only support GET and POST as HTTP request methods and the usual way around this is to funnel all reaquest through those two and have the server interpret what to do based on hidden form fields, which is what Rails does. 
+
+You will need both `:get` and `:post` so if you have them in your `match` route, the rest can be worked around.   
+
+### Sneak Peak at RESTful Routes
+
+If we want a nice, quick generation of routes for CRUD actions we must use the `resources` instead of `match` in routes.rb. Put this in routes.rb:  
+
+	resources :teachers
+
+And run `$ rake routes`. You'll see:  
+
+	      Prefix Verb   URI Pattern                  Controller#Action
+	    teachers GET    /teachers(.:format)          teachers#index
+	             POST   /teachers(.:format)          teachers#create
+	 new_teacher GET    /teachers/new(.:format)      teachers#new
+	edit_teacher GET    /teachers/:id/edit(.:format) teachers#edit
+	     teacher GET    /teachers/:id(.:format)      teachers#show
+	             PATCH  /teachers/:id(.:format)      teachers#update
+	             PUT    /teachers/:id(.:format)      teachers#update
+	             DELETE /teachers/:id(.:format)      teachers#destroy
+
+This is probably what you would want to see if you just defined each route manually. You might wonder what use this is if HTML forms only support GET and POST as HTTP request methods. GET, POST, PUT and DELETE are supported by the implementations of XMLHttpRequest (i.e. AJAX calls) in all the major web browsers (IE, Firefox, Safari, Chrome, Opera).  
+
+Using proper verbs in Rails with `.resources` is part of what is called __RESTful Routes__, which is a design concept that inforces different behaviors for the different the different operations rather than crudely lumping them together into either __GET__ and __POST__. Even though HTTP doesn't exactly support the verbs that make __RESTful Routes__ possible, Rails works around this hoping that one day the standard will be improved. The topic of __RESTful Routes__ is a complicated one and we should set it aside for now and just use just use:  
+
+    match ':controller(/:action(/:id))', :via => [:get, :post]
+
+________________________________________________________________________________
+# CRUD R: Index & Show
+________________________________________________________________________________
+
+Here we will look at the two action that pertain to the __R__ (read) in __CRUD__: `index` and `show`. These are both GET requests which means that have views. There are two other actions that are GET requests with views: `edit` and `new` but these are essentially form preperations for a modification of the database so we won't look at them in this chapter. They will be addressed in the next chapter, __CRUD Write Actions__.  
+
+________________________________________________________________________________
+## CRUD R: Index - Action & View
+
+
+The Rails `index` action is one of the two __R__'s in __CRUD__. It's meant for listing all records whereas the other __R__ action, `show` is meant to show a single record. Index is also the first method to be defined in the controller class if one is to follow the conventional order.
+
+__The Action Method__
+
+Let's make the index variable for all classrooms in our index method:
+
+
+	  def index
+	  	@teachers = Teacher.all # OR: @teachers = Teacher.order("last_name ASC")
+	  end
+
+The alternative you see in there just gives us some nice alphabetical output to the view. This is useful if the rows where added to the database in a somehow random order and we want to force the sorting. As we saw in the __Custom Queries with Named Scopes__ section, we could have defined this in the Model with:  
+
+	scope :sorted, lamba { order("teacher.last_name ASC") }
+	
+Which means instead of `@teachers = Teacher.order("last_name ASC")` in the action, we can just put:  
+
+	  def index
+	  	@teacher = Teacher.sorted
+	  end
+	  
+__The View ERB__
+
+Now let's catch this `@teachers` instance variable in our view file which should be `app/views/teachers/index`. We can use `.each` iteration here to loop through each row in the database and add it to the view in as HTML. Let's first look at how the iterator might look without the HTML, as if it where not in embedded Ruby but rather plain Ruby for output in the console (first run: `@teachers = Teacher.order("last_name ASC")`).  
+
+	@teachers.each do |teacher|
+ 	  printf "%s, ", teacher.last_name
+ 	  printf "%s |", teacher.first_name
+	  printf " Room# %d | ", teacher.classroom.room_num
+ 	  printf " Lab? %s \n ", teacher.classroom.lab_equip
+ 	end
+
+You'll probably see the `printf` lines interrupted by SQL. To avoid that, enter `ActiveRecord::Base.logger = nil #=> nil` and run the loop again.  
+
+Now let's adapt this IRB in our view. First create the shell of the HTML table, missing the data. Launch the server and go to "`/classrooms`" (not "`/classrooms/index`" See `$ rake routes`) to see this in in the browser:  
+
+	<h1>All Teachers</h1>
+	<table border="1">
+	  <tr>
+	    <th>Teacher:</th>
+	    <th>Room#</th>
+	    <th>Lab?</th>
+	  </tr>
+	  <!-- insert here -->
+	<table>
+	
+Now let's replace `<!-- insert here -->` with: 
+
+	<% @teachers.each do |teacher| %>
+	<tr>
+	  <td>
+	    <%= "#{teacher.last_name}, #{teacher.first_name}" %>
+	  </td>
+	  <td><%= teacher.classroom.room_num %></td>
+	  <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
+	</tr>
+	<% end %>
+
+Note that `teacher.classroom.lab_equip ? 'yes' : 'no'` is a ternary operator shorthand for `if teacher.classroom.lab_equip then 'yes' else 'no' end`. Reload your web page and you should see the table filed out. You might also choose to include:  
+
+>* Links in each row, to take the user to that row's:  
+	* `show` action: `link_to("Show", show_path_or_a_hash, class: 'css classes here' )`
+	* `edit` action: `link_to("Edit", edit_path_or_a_hash, class: 'css classes here' )`
+	* `delete` action: `link_to("Delete", destroy_path_or_a_hash, class: 'css classes here' )`
+>* If there are a lot of rows in the database table:
+	* Search functionality  
+	* Pagination     
+	* Sortablability  
+
+Let's actually prepare those links with a placeholder in our view since we will next move on to defining the other actions. Here is the full contents of the file:  
+
+	<h1>All Teachers</h1>
+	<table border="1">
+	  <tr><th>Teacher:</th><th>Room#</th><th>Lab?</th><th>Actions</th></tr>
+	  <% @teachers.each do |teacher| %>
+	  <tr>
+	    <td>
+	      <%= "#{teacher.last_name}, #{teacher.first_name}" %>
+	    </td>
+	    <td><%= teacher.classroom.room_num %></td>
+	    <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
+	    <td>
+	      <%= link_to("Show ", '#') + link_to("Edit ", '#') + link_to("Delete", '#') %>
+	    </td>
+	  </tr>
+	  <% end %>
+	<table>
+
+`'#'` is just a placeholder that reloads the current page.
+
+________________________________________________________________________________
+## A Brief Note on erb and link_to
+
+Note that we used Ruby's `+` string concatination operator just to make them one line of HTML without this monstrosity:  
+
+	<%= link_to("Show ", '#') %><%= link_to("Edit ", '#') %><%= link_to("Delete", '#') %>
+	
+You might wonder why you can't just do this:  
+
+	<%= link_to("Show ", '#'); link_to("Edit ", '#'); link_to("Delete", '#') %>
+
+and the answer is that __each `<%= %>` element has only one output: the return from the last statement!__ Plain Ruby can have multiple method calls in a single statement, concatinating them all together into one return with the `+` operator like `str = method("arg") + method("arg") + method("arg")` so why not __erb__?  
+
+Anyway, all of this is just academic since this is a placeholder for now and will be multiple lines soon, but it's good to know that `<%= %>` only has one output and that `+` can be used to circumvent this.  
+
+__link\_to and CRUD actions__  
+
+If you wanted a link to `/teachers/new` you could used `link_to("New Teacher", new_teacher_path)` or you could use `link_to("New Teacher", {controller: 'teacher', action: 'new'} )`. Rails will default to the controller your view belongs to so you can omit that part of the hash like this: `link_to("New Teacher", action: 'new'` and have a single key/value that is still implicitly a hash. This will produce a HTML in the context of a different controller.  
+
+__When you are dealing with CRUD actions, only those with__ `GET` __verbs have a__ `_path` __available for them.__ They are essentially paths used by Rails for modifying server-side data. They still have URL's but you'll never see them in Google search results, for example. They only make sense in the context of having just entered data in a page, having that data sent to them. 
+
+Even some of the viewable pages need additional information in their GET requests. A URL can be used by one user to view their record in the database table whereas another use will visit the same URL and see another record from the same table. This can be controlled by more elements in your hash with, like `{action: 'new', id: 5}`.  
  
+When you are dealing with views belonging to CRUD action, you'll likely aways use hash syntax rather than `_path` even for links with `GET`, just to keep things consistant.  
+________________________________________________________________________________
+## CRUD R: Show - Action & View
+
+This will be very similar to `teacher#index` only it will only be for one row (one teacher) and and since we have less info, we can display some data from the related courses.  
+
+__#show differs from #index in that it requires the id of the row from the database.__ Compare the two in `$ rake routes`:  
+
+	      Prefix Verb   URI Pattern                  Controller#Action
+	    teachers GET    /teachers(.:format)          teachers#index
+	     teacher GET    /teachers/:id(.:format)      teachers#show
+
+First of all, they both use `teacher_path` but you can see that the end of the url actually expects the id number. If we could just put `link_to("Show ", teachers_path )` we'd actually get the index. The second argument to `link_to` does not need to be a rails route, it can be a hash with string values (__not symbols!__):  
+
+	link_to("Show ", {action: 'show', id: teacher.id} )
+	
+__link\_to is aware on CRUD context!__ What does that mean? Notice there is no mention 
+
+As you can see in the second argument, are grabbing `teacher.id` from the current iteration of `teacher` instead of using a literal id integer. Now reload the page. If you hover over the "Show" link for the teacher with an id of 3, you will see the URL ending with: `/teachers/3`. Keep and eye on your `rails server` output the terminal   
+and click the link. You will see:  
+
+	Started GET "/teachers/3"
+	Processing by TeachersController#show as HTML
+	  Parameters: {"id"=>"3"}
+	  Rendered teachers/show.html.erb
+
+`Parameters: {"id"=>"3"}` is a hint. It means that, in the `TeachersController#show` method, if we check `params[:id]` it will return `3`. Let's head over to this method definition and grab this value, putting it into a instance variable for access in the view file:  
+
+	  def show
+	    @teacher = Teacher.find(params[:id])
+	  end
+
+That's all we need since a teacher with `id == 3` definitely exists since we _just_ discovered it in `#index`. Now let's head over to define the view. We don't need any looping for the teacher since we are only dealing with a single record. First let's make a back button link a table for the single teacher:  
+
+	<%= button_to "<Back", {action: "index"}, {method: :get} %>
+	
+	<h1>Teacher Info</h1>
+	<table border="1">
+	  <tr>
+	    <th>Last Name</th>
+	    <th>First Name</th>
+	    <th>Room</th>
+	    <th>Updated</th>
+	  </tr>
+	  <tr><% t = @teacher %>
+	    <td><%= t.first_name %></td>
+	    <td><%= t.first_name %></td>
+	    <td><%= t.classroom.room_num %></td>
+	    <td><%= t.updated_at %></td>
+	  </tr>
+
+Note that `button_to` actually generates a form around it, which defaults to a `POST` request so we had to bypass that with the third argument option. There is in fact any number of courses per teacher/room pair so we will need to iterate over that using the same instance variable but in the form `@teacher.courses` Take a look at the tables in schema.rb to get an idea of what table headers we'll want. We could actually have an interator for students enrolled conatained within each iteration of a new course. Here is a mock-up of plain Ruby:  
+
+	<% @teacher.courses.each.with_index(1) do |c, i| %>
+	<table border="1">
+	    <tr>
+	      <th colspan="4">Course <%= i %>:</th></tr>
+	    <tr>
+	      <th>Course</th>
+	      <th>Description</th>
+	      <th>Updated</th>
+	    </tr>
+	    <tr>
+	      <td><%= c.name %></td>
+	      <td><%= c.description %></td>
+	      <td><%= c.updated_at %></td>
+	    </tr>
+	
+	    <!-- start enrolled students section -->
+	    <tr>
+	      <th colspan="4"><br>Students Enrolled:</th>
+	    </tr>
+	    <tr>
+	      <th>Student</th>
+	      <th>Grade</th>
+	      <th>Elective?</th>
+	      <th>Updated</th>
+	    </tr>
+	    <% # insert iterator %>
+	    <tr>
+	      <td><%=  %></td>
+	      <td><%=  %></td>
+	      <td><%=  %></td>
+	      <td><%=  %></td>
+	    </tr>
+	    <% # end %>
+	    <!-- end enrolled students section -->
+	
+	</table><br><hr><br>
+	<% end %>
+
+Now, in between of the `<!-- enrolled students section -->`, let's use the `c` variable in to iterated over the student each time `c` changes to a new course in the outer iterator. We'll stayed within the same HTML table in this nested iterator and justed add a wide, `colspan="4"` row to label the "Students Enrolled" portion of the table.  
+
+Now we have a choice: we can access the student's data via `Course.enrollments.each` or `Course.students.each` (since we added the "`has_many :students, through: :enrollments`" to `Course`). Both have limitiation. 
+
+* __OPTION A:__ The `c.enrollments.each do |e|` rows lack the `first_name` and `last_name` columns which makes sense because it would not specify which student is being referred to. This data is only only available via `Student`. We would have to:  
+> 
+  * query the current enrollment row "`e`" to get the student_id. Then use it to  
+  * query the students, limiting it to the one desired student.  
+  * For example: `Student.find(enroll_row.student_id)`  
+
+* __OPTION B:__ The `c.students.each do |s|` rows lack the `grade` and `elective` columns which makes sense because it would not specify which course is being referred to. This data is only only available via the `enrollments` table. We would have to:  
+> 
+  * query the course row from the outer loop to get the course_id. Then use it to  
+  * query the current student's "`s` enrollments using with student id as a foriegn key
+  * For example: `s.enrollments.where(course_id: c.id).first` (without `.first` we get a 1 element array)
+
+Back to our choices, note that it's better to perform the query seen in the `.find()` arguments once and store it, rather than reperforming it multiple times. This would speed up both options. Option A needs a new value for `student_id` with every iteration of the nested loop whereas Option B uses the same `course_id` for the each entire run. In other words, Option B can have the query outside of the loop. This involves less queries so we'll use that.
+
+
+	    <% c_id = c.id %>
+	    <% c.students.each do |s| %>
+	    <% e = s.enrollments.where(course_id: c_id).first %>
+	    <tr>
+	      <td><%= s.last_name %>, <%= s.first_name %></td>
+	      <td><%= e.grade %></td>
+	      <td><%= e.elective %></td>
+	      <td><%= e.updated_at %></td>
+	    </tr>
+	    <% # end %>
+
+Here is the entire file:  
+
+	<%= button_to "<Back", {action: "index"}, {method: :get} %>
+	
+	<h1>Teacher Info</h1>
+	<table border="1">
+	  <tr>
+	    <th>Last Name</th>
+	    <th>First Name</th>
+	    <th>Room</th>
+	    <th>Updated</th>
+	  </tr>
+	  <tr><% t = @teacher %>
+	    <td><%= t.first_name %></td>
+	    <td><%= t.first_name %></td>
+	    <td><%= t.classroom.room_num %></td>
+	    <td><%= t.updated_at %></td>
+	  </tr>
+	</table><br><hr><br>
+	
+	<% @teacher.courses.each.with_index(1) do |c, i| %>
+	<table border="1">
+	  <tr>
+	    <th colspan="4">Course <%= i %>:</th></tr>
+	  <tr>
+	    <th>Course</th>
+	    <th>Description</th>
+	    <th>Updated</th>
+	  </tr>
+	  <tr>
+	    <td><%= c.name %></td>
+	    <td><%= c.description %></td>
+	    <td><%= c.updated_at %></td>
+	  </tr>
+	  <tr><th colspan="4"><br>Students Enrolled:</th></tr>
+	  <tr>
+	    <th>Student</th>
+	    <th>Grade</th>
+	    <th>Elective?</th>
+	    <th>Updated</th>
+	  </tr>
+	  <% c_id = c.id %>
+	  <% c.students.each do |s| %>
+	  <% e = s.enrollments.where(course_id: c_id).first %>
+	  <tr>
+	    <td><%= s.last_name %>, <%= s.first_name %></td>
+	    <td><%= e.grade %></td>
+	    <td><%= e.elective %></td>
+	    <td><%= e.updated_at %></td>
+	  </tr>
+	  <% end %>
+	</table><br><hr><br>
+	<% end %>
+	  
+Here is how the page looks:  
+
+![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/enrollments.png)
+
+	
+________________________________________________________________________________
+# CRUD C: New & Create
+________________________________________________________________________________
+
+Here we'll stay in the teacher controller and make actions to create new teachers and modify existing ones. Data is gathered from the user in HTML forms before submission back to the server.  
+________________________________________________________________________________
+## CRUD C: New - View with Rails Form Helpers
+
+What use it a page without a link to it? Add this somewhere in `teachers/index.html.erb`:  
+
+	<%= link_to( "Add new Teacher", {action: 'new'} ) %>
+	
+The `teacher/new.html.erb` file will basically be a form to enter data for a new teacher record with a submit button that sends a __POST__ request to `teachers#create` together with the data provided in the form. You may already be familiar with HTML forms but we need to address how they interact with your Rails CRUD actions.  
+
+You could create traditional forms in HTML but Rails provides "helpers" that can be used view templates that render Ruby code to normal HTML forms. There are several benefits to using the helpers over writing HTML forms directly as we will see in this section. 
+
+First let's put a plain HTML forms in `teacher/new.html.erb`:    
+
+	<form action="/teachers" method="post">
+	
+	  <input type="text" name="first_name" />
+	  <input type="text" name="last_name" />
+	
+	  <input type="submit" name="commit" value="Create Teacher" />
+	  
+	</form>
+
+When the user hits submit, a POST request is sent to the `/teachers` URL, not `/teachers/create`. If you look at `$ rake routes`, you'll see that that when `/teachers` gets a POST request, the `teachers#create` action is triggered. There are in fact many listings of the `/teachers` URL: Rail will know which action to call based on the HTTP VERB received. 
+
+After Rails get's the POST from the form submission, the values entered into the input fields will be available in the `TeachersController`'s `create` method via the params hash with the following keys:   
+
+> `params[:first_name]` and `params[:first_name]` 
+
+You can then use the values return from each of these to construct a hash argument for `Teacher.new` or `Teacher.create`. This all works fine but if you have many input fields, it can get tedious to deal with all them them back in your server-side code. Each time you have a new field added you have to add more code to your Rails controller. The `new` and `create` methods takes a hash of variable size but have to assemble it from many key/value pairs. As it turns out, HTML has the ability to send all of these fields as an array rather than a lot of separate data:  
+
+
+	  <input type="text" name="teacher[first_name]" />
+	  <input type="text" name="teacher[last_name]" />
+	  
+
+> Now: `params[:teacher][:first_name]` and `params[:teacher][:first_name]`  
+> So: `params[:teacher]` => `{first_name: "Jo", last_name: "Blo"}`
+
+
+Now the hash that `.new` or `.create` take is ready to go from the moment it comes in:  
+
+	teacher = Teacher.new(params[:teacher])
+	
+Now we have pretty functional HTML but we'll rewrite it the Rails way, with helpers. 
+
+	<%= form_tag(action: 'create') do %>
+	
+	  <%= text_field_tag('teacher[first_name]') %>
+	  <%= text_field_tag('teacher[last_name]') %>
+	
+	  <%= submit_tag("Create Teacher") %>
+	<% end %>
+
+If you view the generated HTML you will see that it contains some additional code for formatting and security:  
+
+	<form action="/teachers" accept-charset="UTF-8" method="post"><input name="utf8" type="hidden" value="&#x2713;" /><input type="hidden" name="authenticity_token" value="h9044kPTYxlUUOQOBZ9PJtGxwVANFi/jSYl0ejT6k6PaHBl+6aK/4YimqdI7lbB1gYhFlnaDvuKF87OQ0AD78Q==" />
+	
+	  <input type="text" name="teacher[first_name]" id="teacher_first_name" />
+	  <input type="text" name="teacher[last_name]" id="teacher_last_name" />
+	
+	  <input type="submit" name="commit" value="Create Teacher" />
+	</form>
+	
+That quite a bit more code and would be quite tedious to do manually. The HTML input tag also has an attribute called `value` which pre-fills the input field with it's value. This is particularly useful when the form is meant to modify data already in the database or from the `params` hash and the user should know what the current value is. This would be the case for an `update` action but in `new` we have no current value. This is not entirely true if we have a column of the database set to have a default value. It would be helpful to let the use know that without their modification, this is what the value will be. 
+
+The `text_field_tag` takes a second argument for this `value` attribute. However it can be quite tedious to have all those queries in your code in order to get the values. `text_field_tag` essentially has no idea what the meaning of the argument it, it's simply a string. There is an object-aware helper we can use instead: 
+
+	<%= text_field(:teacher, :first_name) %>
+	<%= text_field(:teacher, :last_name) %>
+
+This won't yeild anything different in the resulting HTML just now since we haven't provided an object from the view's controller but we will in the next section.  
+
+All of the above is fine but there is an even better way, and this is the typical way you will see forms in Rails:  
+
+	<%= form_for(:teacher, url: {action: 'create'}) do |f| %>
+	
+	  <%= f.text_field :first_name %>
+	  <%= f.text_field :last_name  %>
+	  <br>
+	  <%= submit_tag "Create Teacher"  %>
+	<% end %>
+	
+This `form_for` takes two arguments and a code block. The first arg is the symbol for the database object you are working with and the second is hash specifying the target of the submit button. Inside the block we have a shorter syntax, since the content of the data fields is already known to be `:teacher`. We also used the cleaner Ruby syntax option of omitting parenthesis for arguments.  
+
+Most of the time you will probably use `form_for`. Even if you have one field pertaining to a different database object you can mix in something like `<%= text_field_tag('other_obj[col_name]') %>` or `<%= text_field(:other_obj, :col_name) %>`. 
+	
+
+________________________________________________________________________________
+## CRUD C: New - Action
+
+The form sitting in the new tamplate didn't really need anything from it's controller: it's not relying on the context of any one record since it's meant for creating a new one. How ever, we miss out on having default values for the form without creating a new, empty teacher object as an instance variable like this:  
+
+	def new
+	  @teacher = Teacher.new
+	end
+
+This will make the object-aware helper `text_field` actually use the default values from the new teacher object if we had any. If you want to see this in action, add this to `classrooms/new.html.erb`
+
+	<h1>New Classroom</h1>
+	<%= form_for(:classroom, action: 'create') do |f| %>
+	
+	  <%= f.text_field :room_num %>
+	  <%= f.text_field :lab_equip  %>
+	  <br>
+	  <%= submit_tag "Create Classroom" %>
+	<% end %>
+
+with `@classroom = Classroom.new` in the controller action and go to the URL `/classrooms/new`. You'll see `false` sitting in the text field for `lab_equip`. 
+
+________________________________________________________________________________
+## A Brief Note on the Params Hash
+
+It's helpful to understand tha anatomy of a HTTP request and how Rails reinterprets it. If you open your browser's inspection tools and capture the HTTP request sent when the submit button for "__Create Teacher__" is hit you will see something like this:  
+
+Request Header:  
+
+	POST /teachers/create HTTP/1.1
+	Host: localhost:3000
+	Connection: keep-alive
+	Content-Length: 212
+	Cache-Control: max-age=0
+	Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/webp,*/*;q=0.8
+	Origin: http://localhost:3000
+	Upgrade-Insecure-Requests: 1
+	User-Agent: COMPUTER AND BROWSER INFO
+	Content-Type: application/x-www-form-urlencoded
+	DNT: 1
+	Referer: http://localhost:3000/teachers/new
+	Accept-Encoding: gzip, deflate
+	Accept-Language: en-US,en;q=0.8,nb;q=0.6
+	Cookie: olfsk=olfs409316155218; hblid=QmBeXoop14A180gi3m39NCT4E0LQA; _ga=GA1.1.1251382144.1459633826; 	_school_example_session=VERY3289LONG23STRING
+	
+Form Data (raw):  
+
+	utf8=%E2%9C%93&authenticity_token=VERY3289LONG23STRING&teacher%5Bfirst_name%5D=John&teacher%5Blast_name%5D=Doe&commit=Create+Teacher
+	
+Form Data (parsed but still encoded):  
+
+
+	utf8:%E2%9C%93
+	authenticity_token:VERY3289LONG23STRING
+	teacher%5Bfirst_name%5D:John
+	teacher%5Blast_name%5D:Doe
+	commit:Create+Teacher
+
+Form Data (parsed and decoded):
+
+	utf8:✓
+	authenticity_token:ANOTHER3289LONG23STRING
+	teacher[first_name]:John
+	teacher[last_name]:Doe
+	commit:Create Teacher
+	
+Where you see "`teacher`" above is a result of our erb form specifying "`form_for(:classroom,`...". If you move over to the Rails Server and look at the live log you will see the request looking like this:  
+
+	Started POST "/teachers/create" for ::1 at 2016-04-28 18:38:05 -0400
+	Processing by TeachersController#create as HTML
+	  Parameters: {"utf8"=>"✓", "authenticity_token"=>"VERY3289LONG23STRING", "teacher"=>{"first_name"=>"Guy", "last_name"=>""}, "commit"=>"Create Teacher"}
+			
+In you actual Rails application code you will have a has called `params[]` that you can inspect by putting `puts "#{params}:` in your receiving controller action and you'll see:  
+
+	{"utf8"=>"✓", "authenticity_token"=>"VERY3289LONG23STRING", "teacher"=>{"first_name"=>"John", "last_name"=>"Doe"}, "commit"=>"Create Teacher", "controller"=>"teachers", "action"=>"create"}
+
+which looks almost the same but we have `"controller"=>"teachers", "action"=>"create"` added as a result of rails interpreting the location of the request `POST /teachers/create HTTP/1.1` as being for `teachers#create`. What this means is that we have:  
+
+	params[:utf8]
+	params[:authenticity_token]
+	params[:teacher]
+	params[:commit]
+	params[:controller]
+	params[:action]
+
+But we're really only interested in `:teacher` which is actually another hash with two entries:  
+
+	params[:teacher][:first_name] = "John" 
+	params[:teacher][:last_name] = "Doe"
+	
+Thes are the two bits of data we'll actually store to the database, but before we do this we have security concerns as we'll see next.  
+________________________________________________________________________________
+## A Brief Note on Strong Parameters
+
+__Why Strong Parameters?__  
+
+The hash within the hash that contains all the form fields can be quite large  and Rails has for us three methods which allow for __mass-assignment__: 
+
+>> `Teacher.new(params[:teacher])`  
+>> `Teacher.create(params[:teacher])` 
  
- 
- 
+> and we even have one to update existing records:   
+
+>> `@teacher.update_attributes(params[:teacher])`
+
+but there are major security issues with these. You may have column in your database not meant to be modified by the user, like `admin: true`. You might not have that in your form but the server can still take a POST request for `teachers` that has that data in the request message. Imaging you have a field to change a password. This seem totally safe but only if the client doesn't have arbitrary control over `user_name: "Somebody Else"`! Mass-assignment take whatever the params hash has a passes it in to the database without filtering.  
+
+Rails versions 1 and 2 could declare attributes as "protected" from mass-assignment. This means that everything is allowed by default until you specify otherwise. Too many people ignored this option or simply forgot to use it.  
+
+Rails version 3 evolved from using this __blacklisting__ technique to using __whitelisting__, which forces the developer to spell out everything that can be considered safe. Even here, some developers choose to disable it rather than learn to use it properly. Some of this was due to the fact that the way it was done in Rails 3 prevented access at the Model level rather than just in the controllers and views. 
+
+Rails version 4 further refined the __whitelisting__ to have __"strong paramters"__ which moved the whitelisting to just the controllers and views.  
+
+__How to use Strong Paramters__  
+
+Whenever we want to whitelist the two attributes of `params[:teacher]` for mass-assigment, we tell the params hash about them like this:   
+
+	params.require(:teacher).permit(:first_name, :last_name)
+	
+Note that the chaning of `.require().permit()` reflected the order of the sub-hash. In other words, if you have `params[:hash][:attribute]` you will chain your whitelisting to reflect that relationship with `params.require(:hash).permit(:attribute)`. It's important to note that this alone:  
+
+	params.require(:teacher) 
+
+does not whitelist `:first_name` or `:last_name` and in fact it does not whitelist anything, it simply returns the `teacher` hash within `params`, similiar to how referencing `params[:teacher]` would do. So referring back to:  
+
+	params.require(:teacher).permit(:first_name, :last_name)
+
+the `params.require(:teacher)` is evaluated first, into a hash and then the two entries in that hash are then permitted and output from the entire statement. In other words, the chaining is evaluated from left to right. 
+
+__Parameters not listed here still can be assigned, they just can't be mass-assigned!__ Without any whitlisting we can still add each attribute, statement by statement to the temporary `@teacher` object and then save it sucessfully. There is little danger of things going wrong when they are stated explicitly and whitelisting is just a way of being explicit while still allowing for variation in what the hash ends up containing.  
+
+__Where to Put Whitelisting?__
+
+__Don't Let "require" Fool You__  
+
+The require method is not meant to prevent null fields in the database. In other words, it's for whitelisting, not for validation. In any case, it's a bad user experience to let a form be submitted with a missing field that's needed when you could have warned the user via some client-side Javascript that they can't leave the field blank. Even with this in place, you'll still need a server side way of preventing bad entries since scripts can be bypassed or simply not working. But this is not the place of whitelisting. There are some ways to actually require attributes using `.require` but usually this is done at the model level, not in the controller. We'll get into this more when we are on the topic of validation but for now just know that `.require` is a method for whitelisting, not validation.  
+
+________________________________________________________________________________
+## CRUD C: Create
+
+Create is only an action in Rails, it has no view. It's job is primarily to:
+
+* instantiate the object 
+* save the object
+
+		@teacher = Teacher.new(params[:teacher])
+		@teacher.save
+
+
+but also to act as gate protecting the database from:  
+
+* malicous data using Strong Parameters and from  
+* invalid entries using validation   
+
+The server-side Javascript can also perform validation on the `new` form but some things like catching incorrect passwords need to be held private on the server.  
+
+* If all goes well the user is redirected to the index action  
+* If anything fails the user can be redirected to the form  
+
+		if @teacher.save
+		  redirect_to(action: 'index')
+		else
+		  render('new')
+		end
+
+__Persisting Data when Redirecting and Rendering__  
+
+When redirecting back to `new` after safe fails, it would be cruel to make the user type everything all over again, expecially if the form was very long. Fortunately, the `@teacher` instance variable persists across all of these views so as long as our `new` view is made to pre-populate with anything currently in `@teacher`, we should be able to. You might be wondering how going back to `new` after `create` doesn't result in the object being re-created. After all, this is how our `new` action definition looks:  
+
+	def new
+	  @teacher = Teacher.new
+	end
+
+__When the render method is called with a view name, the action for that view is not called,__ the view is rendered directly from wherever the `render` method is called. In our case, this essentially means that `create` is acting as `new`'s action this time around. __Beware of this when there is something important in the action definition that the view needs.__ If there was anything the `new` view will need this second time around, we'll need to put it in the `else` of our `create` method. 
+
+__Whitelisting in Create__  
+
+Now getting back to the `.new` method call, `@teacher = Teacher.new(params[:teacher])` alone would have been fine in previous versions of Rails but now we need something like this:   
+
+	CHANGE THIS >>>>>>	@teacher = Teacher.new(params.require(:teacher).permit(:first_name, :last_name).permit(:classroom_id))
+
+That's a lot of code even with three attributes so most people will put:  
+
+	@teacher = Teacher.new(teacher_params)
+
+and then make a private method at the __bottom__ of the controller called `teacher_params` where they put the exact same code:    
+
+	private
+	  def teacher_params
+	    params.require(:first_name, :last_name).permit(:classroom_id)
+	  end
+
+This is expecially nice when you need to call it more than once. We will probably also need them with the `edit` action so they will be handy.  
+
+Remember that we could still do all of this if we just didn't mass-assign and we added each attribute one at a time but this:  
+
+* raises an error if any required field is not present
+* allow for mass-assignment
+
+Here is the final state of what we added. Note that __the private method must be a the bottom of the class definition!__:  
+
+	  def create
+	    # instantiate a (unsaved) teacher object
+	    # with mass-assigment and whitelisting:
+	    @teacher = Teacher.new(teacher_params)
+	
+	    if @teacher.save # <- save w/ test
+	      # success! send user to teacher index:
+	      redirect_to(action: 'index')
+	    else
+	      # falure. send user back to form.
+	      # (where @teacher can prepopulate)
+	      render('new')
+	    end
+	  end
+	  
+	  ...
+	  
+	 private
+	  def teacher_params
+	    params.require(:first_name, :last_name).permit(:classroom_id)
+	  end
+
+________________________________________________________________________________
+## Avoiding NoMethodError From Missing Data
+
+If you tested your site by filing out the form and hitting submit you probably got an error in the browser from Rails 
+
+	NoMethodError in Teachers#index
+	Showing /app/views/teachers/index.html.erb where line #7 raised:
+	
+	undefined method `room_num' for nil:NilClass
+
+This does not mean your new record was not added to the database. What this means the teacher you created does not have an assocation with a classroom defined, since we didn't put it in the form. The new teacher DOES have a `.classroom` method but it does not have `.classroom.room_number` or any other classroom attribute. The teacher's object has `nil` return when `.classroom` is called on it and we can use this as a test in our view template to decide what to do with teachers without classrooms. These two lines are now errors but we don't even get past the first one.  
+
+	    <td><%= teacher.classroom.room_num %></td>
+	    <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
+
+We can wrap them in the condition which treats the return from `teacher.classroom` as `true` if it's not `nil` and then display `N/A` if it is `nil`:  
+
+	  <% if teacher.classroom %>
+	    <td><%= teacher.classroom.room_num %></td>
+	    <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
+	  <% else %>
+	    <td>N/A</td>
+	    <td>N/A</td>
+	  <% end %>
+
+________________________________________________________________________________
+# CRUD U: Edit & Update
+________________________________________________________________________________
+
+Just like how `new`/`create` was a form/save pair for __C__reating new records, `edit` and `update` do the same to __U__pdate pre-existing records. There are some differences, though. This time around:  
+
+* both `edit` and `update` will require an `id` to get to the right record  
+* `update` will use the `find` and `update_attributes` methods instead of `new` and `save`  
+
+Another possible difference is that certain field are required upon a records creation so:  
+
+* required fields were already taken care of with `new`/`create`  
+
+________________________________________________________________________________
+## CRUD U: Edit  
+
+
+First we need a link to our edit teacher page, probably from `/teachers` (`teachers#index`) since we already have a placeholder there. This link will need to send the teacher `id` with the POST request. Here it is, together with the other links just to give it some context:  
+	
+      <%= link_to("Show ", {action: 'show', id: teacher.id}) %>
+      <%= link_to("Edit ", {action: 'edit', id: teacher.id}) %>
+      <%= link_to("Delete", '#') %>
+
+As you can see, it's pretty much the same as the way we made the link to `show`. You can check that the link works in your browser and then head over to the controller action where we will add to the `edit` method definition. This will also mirror that `show` method since both need to query the database to create an object for the record. In fact, you can just copy and paste. Here is the `edit` method together with the `show` method for context:  
+
+	  def show
+	    @teacher = Teacher.find(params[:id])
+	  end
+	  ...
+	  
+	  def edit
+	    @teacher = Teacher.find(params[:id])
+	  end
+
+For the view template `edit.html.erb` we can copy and paste from `new.html.erb` since they are both basically the same form. Below is the copied code with some changes to it. If you look at the `new` page, you'll see that the title ("New Teacher") and the label for the button ("Create Teacher") need to be changed to something like "Edit Teacher" and "Update Teacher." Beside that, we also need to modify the form's submit action from `form_for(:teacher, action: 'create')` to `'update'`. We also need to provide an `id` this time around, resulting in this:  
+
+	form_for(:teacher, {action: 'update', id: @teacher.id}) 
+
+	<h1>Edit Teacher</h1>
+	<%= form_for(:teacher, {action: 'update', id: @teacher.id}) do |f| %>
+	
+	  <%= f.text_field :first_name %>
+	  <%= f.text_field :last_name  %>
+	  <br>
+	  <%= submit_tag "Update Teacher"  %>
+	<% end %>
+
+
+You also might want to add a field on this page (and maybe even the `new` page) for assigning the classroom or some perhaps even association with `courses` but for now, let's just focus on the core functionality and get it working. Let's move on to saving this data in the `update` action.  
+
+________________________________________________________________________________
+## CRUD U: Update  
+
+Just like the parallel between the view form in `new` to the view form in `edit`, on the receiving end of the forms, the corresponding actions will be similar as well. In other words, the `update` controller action will look a lot like the `create` action. We can use the `teacher_params` again in this action. Here is our `create` action (with comments replaced for more info) as a reminder:  
+
+	  def create # <- change to "update"
+	  
+	    # this line will become a find using id and will not add params: 
+	    @teacher = Teacher.new(teacher_params)
+	    
+	    if @teacher.save # <- will be update_attributes(teacher_params)
+	      redirect_to(action: 'index') # <- this can stay the same
+	    else
+	      render('new') # <- this time it will be 'edit' 
+	    end
+	  end
+
+It's up to you where you want to send them upon success. You might prefer to send them to `show`. Here is our `update` action, adapted from `create` and redirecting to `show` (which needs an id!). 
+	  
+As for the line `redirect_to(action: 'show', id:  @teacher.id )` we could also have gotten the id from `params[:id]` but it hardly matters where you get it. 
+
+________________________________________________________________________________
+# CRUD D: Delete & Destroy
+________________________________________________________________________________
+
+By now you are probably accustomed to the way Rails will split up a CRUD operation into two: action+form w/ a submit button sending to an action (without a view) to save the change and then direct the user somewhere else. Other than __R__ead, this has be how things operate and CRUD's __D__elete will be similar. You might wonder why you need a form to delete a record. In practice, you will usually use the "form" part of the pair as a confirmation or warning, or you might omit it altogether, perhaps using some Javascript notice or modal window to act as a confirmation dialog box.  
+
+This gets back to the point of forms only supporting GET and POST requests. CRUD "D" is supposed to use the DELETE verb but, as was stated earlier, that is not supported in most HTML forms. Having the DELETE verb attached to a route CAN be used for Javascript AJAX. Remember we said:  
+
+> __GET, POST, PUT and DELETE are supported by the implementations of XMLHttpRequest (i.e. AJAX calls) in all the major web browsers (IE, Firefox, Safari, Chrome, Opera).__  
+
+We won't be doing any AJAX here so you can stick to the `match` routes.  
+
+The way Rails will delete a row in the database is typically the `destroy` method so this will be the name of our final (view-less) action which carries out that operation. The form/warning/confirmation will take the "delete" name. Even though many site omit the `delete` action we will make one just for learning purposes.  
+
+________________________________________________________________________________
+## CRUD D: Delete - Action and View  
+
+__Action and Link to it__  
+
+We may need to access the data in the teacher's record to confirm the deletion so let's make our action look the same as `show` and `edit`. If you used `$ rails g scaffold_controller Teachers` to make the controller you'll notice there is no action for `delete` so you'll need to add it.   
+
+
+	  def show
+	    @teacher = Teacher.find(params[:id])
+	  end
+	  ...
+	  
+	  def edit
+	    @teacher = Teacher.find(params[:id])
+	  end
+	  ...
+	  
+	  def delete
+	    @teacher = Teacher.find(params[:id])
+	  end
+
+We, of course, need some link to the delete action/view so let's update our `index` view template to have that:  
+
+      <%= link_to("Show ",  {action: 'show',   id: teacher.id})  %>
+      <%= link_to("Edit ",  {action: 'edit',   id: teacher.id})  %>
+      <%= link_to("Delete", {action: 'delete', id: teacher.id})) %>
+
+__View: the Delete Confirmation__  
+
+This is hardly going to be a "form" but let's just start with an adapted version of `new` and `edit`. If you used `$ rails g scaffold_controller Teachers` you'll notice there is no view template `delete.html.erb` so you'll need to create the file first.     
+
+	<h1>Delete Teacher</h1>
+	<%= form_for(:teacher, {action: 'destroy', id: @teacher.id}) do |f| %>
+	
+	  <h2>Are you sure you want to delete?:</h2>
+	
+	  <%= f.text_field :first_name %>
+	  <%= f.text_field :last_name  %>
+	  <br>
+	  <%= submit_tag "Delete Teacher"  %>
+	<% end %>
+
+There is more we can do to make this page look nicer but it requires a bit of knowledge on HTTP verbs, Rails helpers and routing, as we will address next.  
+
+________________________________________________________________________________
+## Use/Abuse of Links, Buttons, and Verbs
+	
+__IMPORTANT!__ All form actually place an HTTP POST request when the submit button is pressed. Remember we said that most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates? Well, here, POST will be used instead of DELETE for that reason. This also means that we have a difference in our routes between those generated from "default routes" vs `resources` that really matters here. If we used the latter, the `destroy` action is expecting a `DELETE` verb, which we are not giving it here. Therefore, the above will not work with `resources :teachers` but will work with:  
+
+	  match ':controller(/:action(/:id))', :via => [:get, :post]
+	
+This is quite the trap for the user since we have no way to abort the `destroy` action! We could just put a simple back button on the top or maybe under the `<h1>Delete Teacher</h1>`:  
+
+	<%= button_to "Cancel", {action: "index"}, {method: :get} %>
+	
+Remember that this syntax is a sort of cheat to make a button_to work with a get request when they are really meant only for post requests.  
+
+We could have some sort of cancel button to the left of "Delete Teacher" but the whole premise of having a form with editable `text_field`s is already questionable since all we need to do is display information. First let's downgrade from `form_for` to `form_tag` since we don't really need `f`:  
+
+	<h1>Delete Teacher</h1>
+	<%= button_to "Cancel", {action: "index"}, {method: :get} %>
+	<h2>
+	  Are you sure you want to delete 
+	  <%= @teacher.first_name + ' ' + @teacher.last_name + '?' %> 
+	</h2>
+	<br>
+	<%= form_tag({action: 'destroy', id: @teacher.id}) do %>
+	  <%= submit_tag("Delete Teacher")  %>
+	<% end %>
+	
+It's hardly a form but our submit button would not function as we expect without the form, using `button_to` so we have the form there for that reason. Since we've abused the `button_to` helper to work for a GET request we might as well demonstrate it's proper use in a POST request. Unlike the __Cancel__ button, we don't need a third arguments since we are not overriding it's normal behavior. We do, however, need to specify the `:id` which will will put in the expanded version of the second argument, revealing that it is in fact a hash:  
+
+	<h1>Delete Teacher</h1>
+	<h2>
+	  Are you sure you want to delete 
+	  <%= @teacher.first_name + ' ' + @teacher.last_name + '?' %> 
+	</h2><br>
+	<%= button_to "Cancel", {action: "index"}, {method: :get} %>
+	<%= button_to "Delete Teacher", {action: 'destroy', id: @teacher.id} %>
+	
+	
+But wouldn't it be nice if the two buttons were side by side? They are not because Rails is generating form elements around each of them. There is also `button_tag` which just produces an HTML button tag (which is not a link). If you think of how to you would make a button with a link and HTML it probably would involve nesting like 
+
+	<button><a href="/teachers"</a></button>
+
+and then unstyling the anchor. We could do this like:  
+
+	<button>
+	  <%= link_to "Cancel", {action: "index"}, style: 'text-decoration: none;' %>
+	</button>
+
+But the submit button is still inside a form. If you think about it, it really doesn't matter what HTML verbs are sent so long as Rails knows what to do. We already have every action accepting both GET and POST requests because of this:
+
+	match ':controller(/:action(/:id))', :via => [:get, :post]
+
+So why not just send a post request to `/teachers/destroy/3` to destroy teacher with and `id` of `3`? This actually works just fine, so long as we use the `match` route:  
+
+	<button><%= link_to "Cancel", {action: "index"} %></button>
+	<button>
+	  <%= link_to "Delete Teacher", {action: 'destroy', id: @teacher.id} %>
+	</button>
+	
+The HTML from that is simply:  
+
+	<button><a href="/teachers">Cancel</a></button>
+	<button><a href="/teachers/destroy/3">Delete Teacher</a></button>
+
+and the buttons are side by side. 
+
+________________________________________________________________________________
+## CRUD D: Destroy Action 
+
+The Rails action `destroy` is used to actually carry out the `.destroy` method call on the object, deleting it from the database. It does not have a view file and is meant only to catch the submittion of the request to delete and then redirect the user to the index or somewhere else. Here is how the definition can look:  
+
+	  def destroy
+	    @teacher = Teacher.find(params[:id])
+	    @teacher.destroy
+	    redirect_to(action: 'index')
+	  end
+
+But if you think about it, there really is no need for `@teacher` to be an instance variable since we will never need to access it again. We can compress the first two lines to this:  
+
+    teacher = Teacher.find(params[:id]).destroy
+    
+We could even do away with `teacher =` and not save the output at all but we will actually use it in our example code ahead so leave it for now.  
+
+________________________________________________________________________________
+# The Flash Hash and Client-Side Data 
+________________________________________________________________________________
+
+The way we have been interacting with the user thus far can not be accepted as good user experience design (UXD) by today's standards. We haven't been confirming the sucessfull completion of any operation, we've just been shuffling the user around serveral time every time they want to perform an operation. In todays world of single-page web applications we have certainly not made our site be anything like what people expect. This requires a lot of AJAX which is not our focus right now but we should still try to have some confirmation of success, even with a separate page load.  
+
+Each time we redirect the user to the index, the browser basically has no idea what what just happened. The URL is loaded just the same as it would from any user because __HTML is "stateless"__  
+
+The way to retain information between requests is with __cookies__ and __sessions__. Rail's "__Flash Hash__" stores a message in the session data. Old messages don't stick around for very long, so you can use it in a redirect but not usually in any subsequent page loads. The two most common keys on the hash are `:notice` and `:error`
+
+	flash[:notice] = "Profile successfully updated!"
+	flash[:error] = "You must be logged in to do that!"
+
+You'd usually assign some CSS styles to each of these separately and one of the reasons to have more than two would be to have more than two styles at your disposal. Sometime people assign whole object to the hash but you should avoid this since object are big and become disconnected from the database where they can loose track of updates. You can put object directly in the session data where it can be updated more easily.  
+
+### Adding Flash Hashes to our Example  
+
+Let's add some flash hashes in some of our actions of the teachers controller. All of these will be before the line for the redirect and will of course be retained after the redirect has occurred. 
+
+Add this to our teachers#create (to be used in index.html.erb): 
+
+	flash[:notice] = "New teacher added!"
+
+Add this to our teachers#update (to be used in show.html.erb):  
+
+	flash[:notice] = "Teacher updated!"
+
+Add this to our teachers#destroy (to be used in index.html.erb): 
+
+	flash[:notice] = "Teacher deleted!"
+
+Of course we can inject any data from the database into the string like `#{@teacher.first_name}` to customize the messages. This was our reason for leaving the local variable `teacher` in the destroy method, so we can do this:  
+
+	flash[:notice] = "#{teacher.first_name teacher.last_name} deleted!"
+
+### Displaying Flash Hashes in our Example
+
+Usually flash hashes go at the top of your template files and are wrapped in div's, like this:  
+
+	<% if !flash[:notice].blank? %>
+	  <div style="color:white; background-color: #93DB70">
+	    <%= flash[:notice] %>
+	  </div>
+	<% end %>
+
+`.blank?` is a Rails method similar to `.nil?` only a little more flexible. You can add the same to both `index` and `show`. If you test it out and inspect the output, you'll see that it's just text, nothing special. What makes it different than a simple instance variable is that it persists and is cleaned up for you.  
+
+This is Ruby so of course there is another, more terse way to notate this. `if !` is the same as `unless`. Also we have a helper called `content_tag(:div, "content here")` which will wrap the second argument in a div or many other tags as specified by the first argument. The third argument can be a CSS class or ID, etc. We'll make it an ID so we can target it with both CSS and JS (to make it auto-dismiss after some time!):  
+
+	content_tag(:div, flash[:notice], id: 'notice')
+
+Now we're getting to the point where this can be one single line, especially if we put the condition second!  
+
+	<%= content_tag(:div, flash[:notice], id: 'notice') unless flash[:notice].blank? %>
+
+That's probably the shortest way to notate it! Although now that we've accomplished this I'll add that it hardly matters since usually you would put the code once in the layout file and have all the templates use it. So it's not like we'll need to type it over and over but it's still nice to know these shortcut syntaxes since they'll be useful elsewhere.  
+
+Now with a little jQuery we can make it auto-dismiss! Since we're here, let's also style it (although it'd be better to do it in CSS of course):  
+	
+	$('document').ready(function() {
+		
+	  $('#notice').css({ 'color': 'white', 'background-color': '#93DB70' });
+	
+	  setTimeout(function() {
+	    $('#notice').slideUp(); 
+	  },3000);
+	});
+
+________________________________________________________________________________
+# Advanced Forms	
+________________________________________________________________________________
+
+
+
+________________________________________________________________________________
+# Data Validation	
+________________________________________________________________________________
+
+
+
+________________________________________________________________________________
+# User Authentication	
+________________________________________________________________________________
+
+
