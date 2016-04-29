@@ -1,8 +1,4 @@
-<% if !flash[:notice].blank? %>
-  <div style="color:white; background-color: #93DB70">
-    <%= flash[:notice] %>
-  </div>
-<% end %>
+<%= content_tag(:div, flash[:notice], id: 'notice') unless flash[:notice].blank? %>
 
 <%= button_to "<Back", {action: "index"}, {method: :get} %>
 

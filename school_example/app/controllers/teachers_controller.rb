@@ -54,9 +54,9 @@ class TeachersController < ApplicationController
   end
   
   def destroy
-    flash[:notice] = "Teacher deleted!"
     @teacher = Teacher.find(params[:id])
     @teacher.destroy
+    flash[:notice] = "Teacher deleted!"
     redirect_to(action: 'index')
   end
 

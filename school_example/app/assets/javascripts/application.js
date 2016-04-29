@@ -14,3 +14,14 @@
 //= require jquery_ujs
 //= require turbolinks
 //= require_tree .
+
+$('document').ready(function() {
+	
+  $('#notice').css({
+    'color': 'white',
+    'background-color': '#93DB70'});
+
+  setTimeout(function() {
+    $('#notice').slideUp(); 
+  },3000);
+});
