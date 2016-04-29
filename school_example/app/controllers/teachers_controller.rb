@@ -13,6 +13,7 @@ class TeachersController < ApplicationController
   end
 
   def edit
+    @teacher = Teacher.find(params[:id])
   end
 
   def create
@@ -45,6 +46,7 @@ class TeachersController < ApplicationController
     else
       # falure. send user back to EDIT form.
       # (where @teacher can prepopulate)
+      puts "### update_attributes failed."
       render('edit')
     end
   end
