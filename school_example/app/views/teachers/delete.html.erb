@@ -1,0 +1,8 @@
+<h1>Delete Teacher</h1>
+<h2>
+  Are you sure you want to delete 
+  <%= @teacher.first_name + ' ' + @teacher.last_name + '?' %> 
+</h2>
+<br>
+<button><%= link_to "Cancel", {action: "index"} %></button>
+<button><%= link_to "Delete Teacher", {action: 'destroy', id: @teacher.id} %></button>

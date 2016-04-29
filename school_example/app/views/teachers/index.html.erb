@@ -1,15 +1,26 @@
+<% if !flash[:notice].blank? %>
+  <div style="color:white; background-color: #93DB70">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
 <h1>All Teachers</h1>
 <table border="1">
   <tr><th>Teacher:</th><th>Room#</th><th>Lab?</th><th>Links</th></tr>
   <% @teachers.each do |teacher| %>
   <tr>
     <td><%= "#{teacher.last_name}, #{teacher.first_name}" %></td>
+  <% if teacher.classroom %>
     <td><%= teacher.classroom.room_num %></td>
     <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
+  <% else %>
+    <td>N/A</td>
+    <td>N/A</td>
+  <% end %>
     <td>
       <%= link_to("Show ", {action: 'show', id: teacher.id}) %>
       <%= link_to("Edit ", {action: 'edit', id: teacher.id}) %>
-      <%= link_to("Delete", '#') %>
+      <%= link_to("Delete", {action: 'delete', id: teacher.id}) %>
     </td>
   </tr>
   <% end %>

@@ -1,3 +1,9 @@
+<% if !flash[:notice].blank? %>
+  <div style="color:white; background-color: #93DB70">
+    <%= flash[:notice] %>
+  </div>
+<% end %>
+
 <%= button_to "<Back", {action: "index"}, {method: :get} %>
 
 <h1>Teacher Info</h1>
