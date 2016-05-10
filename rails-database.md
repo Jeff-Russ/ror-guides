@@ -1,4 +1,4 @@
-
+ Packages/MarkdownEditing/MarkdownEditor-Blackboard.tmTheme: Unable to open Packages/MarkdownEditing/
 ________________________________________________________________________________
 # Rails on Rails and the Database
 ________________________________________________________________________________
@@ -139,7 +139,7 @@ Some tools available in Ruby don't have much use in saved code but they can be p
 	> String.methods(false)   # only non-inherited
 	> String.instance_methods(false) # only non-inherited instance methods
 	
-	# You can also chan `.grep()` at the end of any of those.  
+	# You can also change `.grep()` at the end of any of those.  
 
 
 
@@ -853,7 +853,7 @@ There is yet another way using newer `references` syntax introduced in Rails 4 t
 	$ rails destroy model Teacher
 	$ rails g model Teacher classroom:references first_name:string last_name:string
 	
-This gives us the migration with the newer synax. Instead of `t.integer "classroom_id"` and `add_index("teachers", "classroom_id")` we have a single line handling both: `t.references :classroom, index: true, foreign_key: true`:  
+This gives us the migration with the newer syntax. Instead of `t.integer "classroom_id"` and `add_index("teachers", "classroom_id")` we have a single line handling both: `t.references :classroom, index: true, foreign_key: true`:  
 
 	class CreateTeachers < ActiveRecord::Migration
 	  def change
@@ -979,7 +979,7 @@ Once you enter the console you might like to take a look at what's on the databa
 	Teacher.first   # returns the first row or nil
 	Teacher.last    # returns the last row or nil
 
-By saying they "return the row" we really mean an object from the class `Teacher` which effectively is a database row. Therefore, we can use this row to instantate a Ruby object.  
+By saying they "return the row" we really mean an object from the class `Teacher` which effectively is a database row. Therefore, we can use this row to instantiate a Ruby object.  
 
 	> teach_id1 = Teacher.find(1) # save to object
 	> teach_id1.class             # => Teacher( hash of attributes... )  
@@ -1172,7 +1172,7 @@ Rails has __Named Scopes__ which allow us to define custom queries in our models
 
 Prior to Rails 4, __Lambda Syntax__ was optional way to define them but now it's required. This is roughly how you define a scope in your model and are usually placed before any method `def` blocks.:  
 
-	scope :name_of_scope, lambda { where(active: true) } # normal lamda syntax
+	scope :name_of_scope, lambda { where(active: true) } # normal lambda syntax
 	# OR...  
 	scope :name_of_scope, -> { where(active: true) }     # "Stabby Lambda" syntax
 
@@ -1271,13 +1271,13 @@ Your first observation of this should take note that whenever you see `belongs_t
 
 The second observation should be that the One-to-One relationship says (reversible) this means that either side can be the keeper of the foreign key and have the `belongs_to` method.  
 
-One-to-Many is not reversible and the many is the side that is the keeper of the foreign keya and has the `belongs_to` method.  
+One-to-Many is not reversible and the many is the side that is the keeper of the foreign keys and has the `belongs_to` method.  
 
 Keep this example in your memory and/or refer back to it as we will need it in future sections.   
 
 __Rails Associations Methods__
 
-The method `has_and_belongs_to_many` is used for this many-to-many and is often spoken of as "the HABTN method." It's essentially both `has_many` and `belongs_to` rolled into one. These, together with `has_one` make up the four macro-like methods for database associations provided to us by the Rails framework. They all accept symbols repesenting the models as arguments. Here  
+The method `has_and_belongs_to_many` is used for this many-to-many and is often spoken of as "the HABTN method." It's essentially both `has_many` and `belongs_to` rolled into one. These, together with `has_one` make up the four macro-like methods for database associations provided to us by the Rails framework. They all accept symbols representing the models as arguments. Here  
 are some things things to adhere to:  
 
 
@@ -1337,7 +1337,7 @@ __Remember to reload console after changing association methods!__ When you do t
 > In `Page` Model, add `belongs_to :page` gives it a `.user` method  
 
 
-The Rails association methods acutally generated customly named methods in both models, each one named to match the other Model's table name in the actual database. Each of these methods can be used to set the association with a row on the other table OR to see if there currently is one already set:
+The Rails association methods actually generated custom named methods in both models, each one named to match the other Model's table name in the actual database. Each of these methods can be used to set the association with a row on the other table OR to see if there currently is one already set:
 	
 The `User` object `first_user` now has:
 >* for getting: `first_user.page`   
@@ -1347,9 +1347,9 @@ The `Page` object `first_page` now has:
 >* for getting: `first_page.user`  
 >* for setting: `first_page.user = first_user`
 
-__NOTE__ that the method names rails creates don't exactly match the table names. The method names are singularized tables name when there is a singular relationship and the same as the table (already plural) table name when there is a plural relationship. It's the name naming we passed into the association methods in the model's class definitions.   
+__NOTE__ that the method names rails creates don't exactly match the table names. The method names are singular-ized tables name when there is a singular relationship and the same as the table (already plural) table name when there is a plural relationship. It's the name naming we passed into the association methods in the model's class definitions.   
 
-Since the two objects we instantated in the console were defined BEFORE we changed their class's definitions they do not have these methods! The class defintions are loaded into the console when the console is started. Not only do we have to re-instantiate the object, we need to first restart the console:  
+Since the two objects we instantiated in the console were defined BEFORE we changed their class's definitions they do not have these methods! The class definitions are loaded into the console when the console is started. Not only do we have to re-instantiate the object, we need to first restart the console:  
 	
 	> first_user.page # NO METHOD ERROR
 	> first_page.user # NO METHOD ERROR
@@ -1379,7 +1379,7 @@ When you have these associations added, it triggers Rails to do some magic behin
 
 __Associating Two Specific Records:__  
 
-First let's make some classrooms and instatiate some teacher objects:  
+First let's make some classrooms and instantiate some teacher objects:  
 
 	$ rails c
 	> room1 = Classroom.create(room_num:111)
@@ -1403,7 +1403,7 @@ As we started to say before, the two might seem to be the same but they are not.
 	> teach1.classroom  # => nil  
 	> room1.teacher     # => nil
 
-Now let's make the assocation:  
+Now let's make the association:  
 
 	> room1.teacher = teach1  
 		  Teacher Load (0.2ms)  SELECT  "teachers".* FROM "teachers" WHERE "teachers"."classroom_id" = ? LIMIT 1  [["classroom_id", 1]]
@@ -1448,7 +1448,7 @@ You can remove the association without removing the actual data by:
 * `classroom.teacher.delete`  
 * `first_teacher.classroom.delete`  
 
-Or we can adapt our previous mass assignment iterator to be a mass unassigner:  
+Or we can adapt our previous mass assignment iterator to be a mass un-assigner:  
 
 	> Teacher.ids.each {|i| t = Teacher.find(i); t.classroom_id = nil; t.save }
 
@@ -1465,7 +1465,7 @@ One-to-many relationships are much more common than one-to-one relationships and
 
 __As Per Our Classroom Example:__  
 
-You might remember seeing that the the "foreign keys should go on the `courses` tables." and you might have wondered why. Think of it this way: if you have a single object attached to many, it makes more sense to have each on the the "many side" store the relationship to the single object. Otherwise, the single object would need many foreign keys, one for each of the many objects it's related to. Each of these would require an addtional column for the foreign key. This gets messy and it makes a lot more sense for each record the "many side" to have a single foreign key.  
+You might remember seeing that the the "foreign keys should go on the `courses` tables." and you might have wondered why. Think of it this way: if you have a single object attached to many, it makes more sense to have each on the the "many side" store the relationship to the single object. Otherwise, the single object would need many foreign keys, one for each of the many objects it's related to. Each of these would require an additional column for the foreign key. This gets messy and it makes a lot more sense for each record the "many side" to have a single foreign key.  
 
 For this reason, we have foreign key on the `courses` table, each pointing to the teacher that `belongs_to` it. To abstract this out of our example, the __foreign key MUST go on the table that__ `belongs_to` __when the thing it belongs to__ `has_many`, similar to what we saw with 1:1, only now it really matters since we are dealing with a `has_many`.
 
@@ -1508,7 +1508,7 @@ Now let's load up our teachers and create some courses:
 	> art.class
 		=> Course(id: integer, teacher_id: integer, name: string, description: text, created_at: datetime, updated_at: datetime)  
 
-Let's leave `art` unsaved to preform a test. Now let's make a bunch more with `create` using the magic of Ruby's `eval` function which takes Ruby code as a raw string and exectutes it. Here we make a method that iterates over an array of strings and each will be set as the value in the `name:` column. The method will return a hash of all the course objects we created, with the keys being the symbol form of the strings for `name:`. First have a look at the method is a more readable form:  
+Let's leave `art` unsaved to preform a test. Now let's make a bunch more with `create` using the magic of Ruby's `eval` function which takes Ruby code as a raw string and executes it. Here we make a method that iterates over an array of strings and each will be set as the value in the `name:` column. The method will return a hash of all the course objects we created, with the keys being the symbol form of the strings for `name:`. First have a look at the method is a more readable form:  
 
 	def create_courses array
 	  h={}; arr.each do |c|
@@ -1543,7 +1543,7 @@ but you won't be able to access what you just made without getting them out of t
 
 __Associating Specific Records__
 
-Note that `art` is just a temporary object. We could explicitly `.save` it before assigning it to ateacher but let's see if assignment will also save it. Let's first try mass assignment with `= [an, array]`. Remember from one-to-one, the object with `belongs_to` does not save when assigned to. In this case that's the `Course` object. Based on that, let's assume `Teacher` objects should automatically save and since it's a `has_many` it's the only side that can accept an array anyway so we'll try it out:  
+Note that `art` is just a temporary object. We could explicitly `.save` it before assigning it to a teacher but let's see if assignment will also save it. Let's first try mass assignment with `= [an, array]`. Remember from one-to-one, the object with `belongs_to` does not save when assigned to. In this case that's the `Course` object. Based on that, let's assume `Teacher` objects should automatically save and since it's a `has_many` it's the only side that can accept an array anyway so we'll try it out:  
 
 	> teach1.courses = [art, bio]  
 
@@ -1571,7 +1571,7 @@ You can remove the association without removing the actual data by:
 
 	> first_teacher.courses.delete(bio)
 
-Or remove association and delete the associatated record:  
+Or remove association and delete the associated record:  
 
 	> first_teacher.courses.destroy(chemistry)
 	> first_teacher.courses.empty?
@@ -1584,7 +1584,7 @@ will apply to `associated_record`, not `record`.
 
 	first_teacher.courses.where(name: chemistry)
 
-This would show the data for the chemestry class if we hadn't deleted it.  
+This would show the data for the chemistry class if we hadn't deleted it.  
 ________________________________________________________________________________
 ## Many-to-Many with Model-less Joins
 
@@ -1592,7 +1592,7 @@ In the case of Many-to-many, it's far too complicated to have foreign keys on ea
 
 ![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join.png)  
 
-That mess of connections is now encapsulated in another green box. This is called a "join table" in relational database terminology and in fact __JOIN__ is a keyword in SQL. The Join's primary job is to hold the foreign keys for multiple tables so they don't have to. The naming convention in Rails is to name the table with the names of the two tables it joins, with an underscore between them. Of course, like all table names, the name will be two plural words. __IMPORTANT:__ Rails expects these two table names to be in __alphabetical order__ in the join table's name. You can configure Rails to use some other name but things won't work automatically unless you follow these conventions.  
+That mess of connections is now encapsulated in another green box. This is called a "join table" in relational database terminology and in fact __JOIN__ is a keyword in SQL. The JOIN's primary job is to hold the foreign keys for multiple tables so they don't have to. The naming convention in Rails is to name the table with the names of the two tables it joins, with an underscore between them. Of course, like all table names, the name will be two plural words. __IMPORTANT:__ Rails expects these two table names to be in __alphabetical order__ in the join table's name. You can configure Rails to use some other name but things won't work automatically unless you follow these conventions.  
 
 __Join tables dealing with two Models in Rails have:__  
 >
@@ -1654,7 +1654,7 @@ For this exercise you should have two courses and two students added to your dat
 ________________________________________________________________________________
 ## Many-to-Many with Modeled Joins
 
-When we associated students to courses all we did was record the fact that the two are linked without any further details about the relationship. In some cases it becomes necessary to record more details about the nature of the association. In our example's Student and Course models, we might want to keep track of what semeseter the student took or is taking the course, their grade, etc. All of this should go in the join table since it's the joins role to keep track of anything relating to both records in relation to each other.  
+When we associated students to courses all we did was record the fact that the two are linked without any further details about the relationship. In some cases it becomes necessary to record more details about the nature of the association. In our example's Student and Course models, we might want to keep track of what semester the student took or is taking the course, their grade, etc. All of this should go in the join table since it's the joins role to keep track of anything relating to both records in relation to each other.  
 
 For this we need to restructure our Rails association methods. Before we had this:
 
@@ -1672,7 +1672,7 @@ Our join will still have two foreign keys but now that __we have a model for it 
 
 __Naming Join Models__
 
-__When we create the join with an explicit model we no longer need to follow naming convensions and can give it a more descriptive name.__ Usually these join tables end with "__-ments__" or "__-ships__" as in "assignments" or "memberships." Usually there is one model name in this name like ""course enrollments" but since it's self apparent that "enrollments" involves students and teachers we can keep it short. It's a matter of preference.  
+__When we create the join with an explicit model we no longer need to follow naming conventions and can give it a more descriptive name.__ Usually these join tables end with "__-ments__" or "__-ships__" as in "assignments" or "memberships." Usually there is one model name in this name like ""course enrollments" but since it's self apparent that "enrollments" involves students and teachers we can keep it short. It's a matter of preference.  
 
 __Associations In Models that use a Modeled Join__
 
@@ -1741,7 +1741,7 @@ Not having a model certainly deprives us from many of the useful functionalities
 	> Rails.application.eager_load!
 	> CoursesStudent.column_names #=> ["course_id", "student_id"]
 
-Success! It knew the schema of the `courses_students` table. Let's get this intersection of columns name (`["course_id", "student_id"]`) in an array variable and then interate over all the data, creating new rows in the new Join:     
+Success! It knew the schema of the `courses_students` table. Let's get this intersection of columns name (`["course_id", "student_id"]`) in an array variable and then integrate over all the data, creating new rows in the new Join:     
 
 	> columns = (CoursesStudent.column_names & Enrollment.column_names) - ["id"]  
 	> Enrollment.create( CoursesStudent.all(:select => columns.join(",") ).map(&:attributes) )
@@ -1780,7 +1780,7 @@ but we need to use `add_column(table_name, column_name, type, options = {})`
 
 Note that Rails is smart enough to know that `precision: 5, scale: 2` is actually `{precision: 5, scale: 2}` if you had notated it that way.  
 
-We used `decimal` for grades because it has fixed precision and is not floating point. `:scale` determines the number of digits after the decimal point and `:precision` determins the total number of digits. `elective` indicated wheather the course is an elective or required:  
+We used `decimal` for grades because it has fixed precision and is not floating point. `:scale` determines the number of digits after the decimal point and `:precision` determines the total number of digits. `elective` indicated whether the course is an elective or required:  
 
 Now we can run `rake db:migrate` and move on to defining the model files which are empty classes at the moment. If you want, you can first check `Enrollment.all` to see if the columns were added. Next add the following (Remember that there is a better way to do this but for the sake of learning we will use the above association methods.):   
 
@@ -1866,7 +1866,7 @@ The solution is to add to a second relation to each of our two outer models whic
 
 ![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/db_join_with_through.png)
 
-Basically what these do is say "we have a relatinship with students/courses that you can find out about if you look at the enrollments table."  
+Basically what these do is say "we have a relationship with students/courses that you can find out about if you look at the enrollments table."  
 
 Now if you go to console and query a student or course you will see the SQL has added an __"INNER JOIN."__ Now the following are available:  
 
@@ -1875,14 +1875,14 @@ Now if you go to console and query a student or course you will see the SQL has 
 	> course1.students
 		=> # shows student data
 		
-and show the other tables data by __"traversing the INNER JOIN."__ This is easier and more efficient but be aware that it's __not exactly the same as a direct assocation in some cases.__ We can use `<<` to add students and courses to each other but __if the INNNER JOIN has required fields we can't successfully save the record without adding to the JOIN directly.__ for this reason, you might want to do everything via an object from the JOIN when creating a record and then you can use the way possible with `:through` for modifying existing records.  
+and show the other tables data by __"traversing the INNER JOIN."__ This is easier and more efficient but be aware that it's __not exactly the same as a direct association in some cases.__ We can use `<<` to add students and courses to each other but __if the INNNER JOIN has required fields we can't successfully save the record without adding to the JOIN directly.__ for this reason, you might want to do everything via an object from the JOIN when creating a record and then you can use the way possible with `:through` for modifying existing records.  
 
 ________________________________________________________________________________
 ## Overriding Default Names with Associations
 
 __Replacing Model Names__  
 
-In real life, people places and things have multiple roles and are named differently according to those changing roles. For example, a "person" becomes a "lawyer" in assocation with "law firm" and then becomes "husband" in relation to "wife" who is hopefully also a "person." In our example teachers might also be "guidance counselor" or "football coach" after school hours. It would make sense for our association methods to reflect this; a FootballTeam model wouldn't make sense if it had a "teacher" method.  
+In real life, people places and things have multiple roles and are named differently according to those changing roles. For example, a "person" becomes a "lawyer" in association with "law firm" and then becomes "husband" in relation to "wife" who is hopefully also a "person." In our example teachers might also be "guidance counselor" or "football coach" after school hours. It would make sense for our association methods to reflect this; a FootballTeam model wouldn't make sense if it had a "teacher" method.  
 
 We won't actually add any of this to our database but if we were to do so, the FootballTeam model class would show something like this:  
 
@@ -1916,7 +1916,7 @@ Remember that the methods in Rails controllers are called "actions" and each usu
 
 ![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/crud_actions.png)
 
-In terms of what actually happens on the web, the __"HTTP Verb"__ are the only thing that actually exists. They keywords that are actually part of the HTTP response and request messages. The actions are, of course, the names of the methods in the Rails controller classes. THe CRUD operations are really just abstract catergories for the HTTP Verbs and the Rails actions basically  
+In terms of what actually happens on the web, the __"HTTP Verb"__ are the only thing that actually exists. They keywords that are actually part of the HTTP response and request messages. The actions are, of course, the names of the methods in the Rails controller classes. THe CRUD operations are really just abstract categories for the HTTP Verbs and the Rails actions basically  
 add views, which are GET requests, to each of the CRUD operations. In this way:  
 
 CRUD __create__ == HTTP __POST__ == Rails __create__  
@@ -1924,7 +1924,7 @@ CRUD __read__ == HTTP __GET__ == Rails __show__
 CRUD __update__ == HTTP __PUT__ or __PATCH__ == Rails __update__    
 CRUD __delete__ == HTTP __DELETE__ == Rails __destroy__  
 
-They only odd one here is that we have `destroy` where we expected `delete`. `delete` is actually used to display the delete form, a view/GET. This is because ActiveRecord has a `delete` method and a `destroy` method but, as was pointed out earlier, `delete` has issues and `destroy` is preferred. The action name `destroy` is meant to match this ActiveRecord method. In practice, you won't see the Rails `delete` action very often and if you do, it will be for form display (GET) purposees and not for the calling of `delete`.  
+They only odd one here is that we have `destroy` where we expected `delete`. `delete` is actually used to display the delete form, a view/GET. This is because ActiveRecord has a `delete` method and a `destroy` method but, as was pointed out earlier, `delete` has issues and `destroy` is preferred. The action name `destroy` is meant to match this ActiveRecord method. In practice, you won't see the Rails `delete` action very often and if you do, it will be for form display (GET) purposes and not for the calling of `delete`.  
  
 All of the CRUD operations have a corresponding Rails action that is GET request.   
 
@@ -1933,7 +1933,7 @@ Rails adds the GET action/view __index__ for CRUD __read__
 Rails adds the GET action/view __edit__ for CRUD __update__    
 Rails adds the GET action/view __delete__ for CRUD __delete__   
 
-All of these are meant to display a form before modification takes place, with the excpetions of CRUD "__read__", which is already a GET request so Rails breaks it down in to the actions __index__ to show all records and __show__ to show a single one.  
+All of these are meant to display a form before modification takes place, with the exceptions of CRUD "__read__", which is already a GET request so Rails breaks it down in to the actions __index__ to show all records and __show__ to show a single one.  
 
 A frequent practice is to place the standard CRUD actions in each controller in the following order: `index`, `show`, `new`, `edit`, `create`, `update` and `destroy` (omitting `delete`). You don't have to follow this order but since they are public methods they must be placed before private or protected method in the controller in order to work.  
 
@@ -1947,7 +1947,7 @@ Where action names roughly map out to CRUD operations and Rails ActiveRecord nam
 ________________________________________________________________________________
 ## Generating CRUD Controller/Actions/Views
 
-We should start off by makeing a controller for Teachers since it can pivot to two sides: classrooms and courese. A classrooms controller wouldn't really have as much to CRUD. Probably the preferred way to get started is to use the generate command and list the actions desired. Let's make a controller for the Teacher model:  
+We should start off by making a controller for Teachers since it can pivot to two sides: classrooms and course. A classrooms controller wouldn't really have as much to CRUD. Probably the preferred way to get started is to use the generate command and list the actions desired. Let's make a controller for the Teacher model:  
 
 	$ rails generate controller Teachers index show new edit create destroy
 	
@@ -2026,15 +2026,15 @@ Notice we didn't type `TeachersController` even though that is what results. Als
 	      @teacher = Teacher.find(params[:id])
 	    end
 	
-	    # Never trust parameters from the scary internet, only allow the white list through.
+	    # Never trust parameters from the scary Internet, only allow the white list through.
 	    def teacher_params
 	      params.fetch(:teacher, {})
 	    end
 	end
  
-There is a lot in this code that might be foreign to you at this point but the important takaways are: the order of the actions here follows Rails convention, the extensive use of `@instance` variables is common for CRUD in the controllers, and the tests `if @teacher.save` and `if @teacher.update(teacher_params)` are used for error handling.
+There is a lot in this code that might be foreign to you at this point but the important takeaways are: the order of the actions here follows Rails convention, the extensive use of `@instance` variables is common for CRUD in the controllers, and the tests `if @teacher.save` and `if @teacher.update(teacher_params)` are used for error handling.
 
-The primary duties carried out in CRUD method defintitions are:  
+The primary duties carried out in CRUD method definitions are:  
  
 >* Making `@instance_variables` (set from results of db queries) available to erb view files
 >* Getting back `@instance_variables` from the erb view files and saving them to the db
