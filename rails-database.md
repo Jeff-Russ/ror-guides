@@ -1,15 +1,14 @@
- Packages/MarkdownEditing/MarkdownEditor-Blackboard.tmTheme: Unable to open Packages/MarkdownEditing/
 ________________________________________________________________________________
 # Rails on Rails and the Database
 ________________________________________________________________________________
 
 ## Introduction  
 
-When a language such as PHP, Python or Ruby is used as a "Back-End language" it's primary purpose it to connect the user facing parts of an application: the HTML text and the JavaScript + CSS GUI, to the database. They do this by dynamically rendering HTML based on what is in the database.  
+When a language such as PHP, Python or Ruby is used as a "Back-End language", it's primary purpose it to connect the user facing parts of an application, the HTML text and the JavaScript + CSS GUI, to the database. They often do this by dynamically rendering HTML based on what is in the database.  
 
-Rails extends Ruby's role into an all-encompassing framework which handles more than just the generation of HTML. It follows what's call the "MVC design pattern" which dictates exactly how the database is described in Ruby by so called "models", how requests are routed in light of details of the database, and how different user interface "views" are connected to the models with so called "controllers."  
+Rails extends this role into an all-encompassing framework which handles more than just the generation of HTML. It follows what's call the "MVC design pattern" which dictates exactly how the database is described in Ruby by so-called "models", how requests are routed in light of details of the database, and how different user interface "views" are connected to the models with so called "controllers."  
 
-We cannot talk about how Ruby interfaces with the database without first understanding the entire Rails architecture and for that reason we will have the following section before diving into "Rails and the Database."  
+We cannot talk about how Ruby interfaces with the database without first understanding the Rails architecture and for that reason we will have the following sections before diving into "Rails and the Database."  
 
 * The Rails Architecture  
 	* How Rails Handles Requests  
@@ -29,19 +28,15 @@ ________________________________________________________________________________
 
 ## How Rails Handles Requests  
 
-The requests first hits the server before anything Rails related hears about it.  
+The requests first hit the server before anything in the Rails MVC hears about it. Rails actually tries to respond to requests with the public folder first and only searches it's "routes" if it doesn't find anything that matches the request in the public directory. This means that requests handled by things in the public directory bypass the Rails MVC and are served up quickest.  
 
-Rails actually tries to respond to requests with the public folder first and only searches routes if it doesn't find anything that matches the request in the public directory. This means that requests handled by things in the public directory bypass the Rails Framework and are served up quickest.  
+Any requests that hit the MVC's routing are funneled into a controller. The controllers have direct access to both views and models, with one-way and two-way interaction respectively. The model has two-way access with the database and is the only component to have it.  
 
-All requests that hit the framework's routing are funneled into a controller. The controller has direct access to both views and models, with one way and two way interaction respectively. The model has two way access with the database and  
-is the only component to have it.  
-
-And connection between the views and models are handled via the controller action. This is one-way, meaning the model can talk to the view via the controller action but the view only calls back to the server. Not only that, the view is the ONLY component to call back to the server, which then serves back the response to the client browser.  
+Any connection between the views and models are handled via a "controller action". This is one-way, meaning the model can talk to the view via the controller action but the view only calls back to the server. Not only that, the view is the ONLY component to call back to the server, which then serves back the response to the client browser.  
 
 ![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/rails_structure.png)
 
-If you drop and HTML file in public, it will be available if typed after `/` in the url. Some web servers let you skip the `.html` extension in the path. If you create a directory in public, it will be reflected in url's as well. So  
-both your routes in routes.rb and the file structure of the public folder will define url paths but keep in mind that public takes precedence!  
+If you drop and HTML file in `/public`, it will be available if typed after `/` in the url. Some web servers let you skip the `.html` extension in the path. If you create a directory in public, it will be reflected in the url as well. So both your routes in `routes.rb` and the file structure of the public folder will define url paths but keep in mind that `/public` takes precedence!  
 
 __A Closer Look__  
 
@@ -71,7 +66,7 @@ This is the normal way of handling a request but there are many exceptions. As w
 ________________________________________________________________________________
 ## Command Line Tools For Rails
 
-Rails was build for development on Unix and Linux machines and makes extensive use of the command line. The exact of these tools will become more clear after using them but for now here is a broad overview.  
+Rails was build for development on Unix and Linux machines and makes extensive use of the command line. The exact purpose of these tools will become more clear after using them but for now here is a broad overview.  
 
 __Rails__ has a command simply named __"rails"__ which is called to generate your app as well as various parts withing your app. Type `rails new app_name` to generate a new Rails app.  
 
@@ -141,8 +136,6 @@ Some tools available in Ruby don't have much use in saved code but they can be p
 	
 	# You can also change `.grep()` at the end of any of those.  
 
-
-
 Methods in Ruby are also objects. Let's take the Ruby class `String` which has a method called `upcase` as an example. Objects created from any class have a method called `method` that takes a :symbol version of a method name as an argument
 	
 	> class_object = String.new
@@ -159,6 +152,7 @@ So how is this useful? In Rails, a lot of your classes have methods added to the
 	> Model.method(:create).source_location
 		=> ["~/.rvm/gems/ruby-2.2.3/gems/activerecord-4.2.6/lib/active_record/persistence.rb", 29]
 	
+
 We didn't need `.new` in there since `create` is a class method (doesn't need a new object made to be available). Now just copy the path and remember it's "line 29"
 	
 	> exit
@@ -217,7 +211,7 @@ this is a simple route and it's actually shorthand for:
       :to => "ctrlName#actionName",
       :via => :get
 
-The long version shows us that Rails is matching the string in the url to another string which represents the controller action pair and does this for GET requests. The two strings do not need to be exactly the same but when they are, the shorthand is available.  
+The long version shows us that Rails is matching the string in the url to another string which represents the controller action pair and does this for `GET` requests. The two strings do not need to be exactly the same but when they are, the shorthand is available.  
 
 ### Default Route  
 
@@ -225,7 +219,7 @@ The Simple route handles a single, explicitly defined string url but often we wa
 
 When all of these actions are dedicated to HTTP `GET` requests (they all are meant to "ask for" a view in the form of an HTML reply) you have a case for using Rails "Default Routes". A default route follows the form:
 
-> :controller/:action/:id
+	:controller/:action/:id
 
 And always in that order. For example, lets say we have something to let users edit something. We have a User controller with an edit action and each user has an integer id in the database. Here is how you would write a default route:
 
@@ -270,7 +264,7 @@ ________________________________________________________________________________
 Each route has a URL that is typically `"/controllername/actionname"` and you could access them simply with strings like that but Rails give you something helper methods that return this string.  The the main reason you would want to use them is that they are safer. URL's change but the structure of your controllers tends to stay the same. If the actual URL path changes, the helper name will return the new path. These helper names are generated based on the contents of `routes.rb`. After you have that file set up, go to your terminal and type:  
 
 	$ rake routes
-	
+
 If you had a controller called `ctrlname` and action names like `index`, `show`, etc, you will see something like this:  
 
 	          Prefix Verb URI Pattern                            Controller#Action
@@ -291,7 +285,6 @@ Add `_path` at the end of any of the __Prefix__es listed above and you have the 
 	>  
 	> ctrlname_index_path # returns "/ctrlname/index"
 	> root_path           # returns "/"
-	
 
 ________________________________________________________________________________
 # Rails and the Database
@@ -306,8 +299,6 @@ Let's go over how to create a database. You should know how to do this not just 
 	SHOW DATABASES;          
 	USE db_name;             
 	DROP DATABASE db_name;   # deletes database
-
-SKIP SKIP SKIP SKIP
 
 __Configuring App to DB:__  
 
@@ -328,7 +319,7 @@ The `adapter:` value will change depending on what database tech you are working
   
 `socket:` is important because it's the file that Rails uses while connecting. This should be set auto-magically but if for any reason it does not, here is where you set it. To test your connection to the database you can do this in terminal:
 
-	$ rake db:schema:dump
+	> $ rake db:schema:dump
 
 This has Rails connect to the database and export the schema in a new file `db/schema.rb`. If you don't get an error and you do see this file, you connected successfully.  
 ________________________________________________________________________________
@@ -336,15 +327,14 @@ ________________________________________________________________________________
 
 The analogy of a database to a spreadsheet is helpful but incomplete. First the helpful part; If one were to arrange a spreadsheet as if it was a true database you would start with a horizontal row atop the spreadsheet with each cell labeling what kind of data goes below it in each column, i.e. first-name, last-name, address, etc.  
 
-In a real database, each cell in the __column__ below the labeling cell is if a particular data type, i.e. integer, string, etc) and only that type.  
+In a real database, each cell in the __column__ below the labeling cell is if a particular data type, (i.e. integer, string, etc) and only that type.  
   
 Each __row__ refers to a different real-life object (person, product, etc) and is also sometimes (incorrectly, some say) called a __record__.  
   
 The intersection of a row and a column is called a __field__ in databases. This entire structure is equivalent of a real database __table__. Typically a  
 application has only one __database__ with many __tables__.  
   
-What make Relational Databases Management System distinct from spreadsheets is the __relational__ part. In a RDMS, one real live entity might have it's details  
-listed in multiple tables which are linked together with __foreign keys__. We'll see more about foreign keys later but just know they provide a way of linking a row of data in one table to another. For example, we may have a table for contact info on people and another on medical history. A single patient has their data in multiple tables but within the tables cells there are references to other table rows in in order to link them together. This is helpful for organizing your database into smaller pieces rather than just having one big, unwieldy table.  
+What make Relational Databases Management System distinct from spreadsheets is the __relational__ part. In a RDMS, one real live entity might have it's details listed in multiple tables which are linked together with __foreign keys__. We'll see more about foreign keys later but just know they provide a way of linking a row of data in one table to another. For example, we may have a table for contact info on people and another on medical history. A single patient has their data in multiple tables but within the tables cells there are references to other table rows in in order to link them together. This is helpful for organizing your database into smaller pieces rather than just having one big, unwieldy table.  
   
 Another thing that makes spreadsheets and RDMS different is __indexes__. An index on a RDMS table allows for rapid lookup of a record. In spreadsheets you are just looking things up with your own eyes but in a real database, lookups are often done in software and need to be blazing fast!  
 ________________________________________________________________________________
@@ -360,8 +350,7 @@ __What are Migrations?__
 
 Rails will use what it calls __migrations__ to automate the process of setting up your database's schema. The migration files are nothing more than Ruby Classes containing methods to set `up` changes or take them `down` (undo) and in fact can have two methods matching those names.
 
-Each time a change is needed to the database's schema, a migration file is made and it's `up` method is called, which creates whatever tables, columns, etc are  
-needed. The `down` method usually resemble the `up` methods with the order or instructions reversed.  
+Each time a change is needed to the database's schema, a migration file is made and it's `up` method is called, which creates whatever tables, columns, etc are needed. The `down` method usually resemble the `up` methods with the order or instructions reversed.  
 
 New in Rails version 3 was support for a method called `change` to be used instead of both `up` and `down`. Here, rails attempts to use the same method for both doing and undoing, by guessing how the method might be executed in reverse as is needed for undoing.  
 
@@ -410,13 +399,11 @@ ________________________________________________________________________________
 ## Naming Conventions with Generate
 
 It's important to realize that all `generate` is doing is generating file and filenames. It's not doing anything magical like linking them together. It's the  
-names of each item that leads to them being linked. One could create all the files and, if named properly, the end result would be the same as if `generate`  
-was used.  
+names of each item that leads to them being linked. One could create all the files and, if named properly, the end result would be the same as if `generate` was used.  
 
 When you run `rails generate` + __something__, rails will make filenames, classnames and sometimes method names. Since naming conventions for these three do not mirror each other, the `rails generate` command can accept PascalCase or snake\_case and will adjust the result according to Rails naming conventions.  
 
-When it comes to the issue of plural vs singular, The command you type should adhere to the conventions. For example. You are generating a user model you can  
-type `rails g model User` or `rails g model user` but don't type the plural versions of these.
+When it comes to the issue of plural vs singular, The command you type should adhere to the conventions. For example. You are generating a user model you can type `rails g model User` or `rails g model user` but don't type the plural versions of these.
 
 In contrast, if you are working with __migrations__ for these you should use the __pluralized__ versions. For example, `rails g migration ModifyUsers` or `rails g migration modify_users`.  
 ________________________________________________________________________________
@@ -427,8 +414,7 @@ It may seems obvious but Ruby and SQL are vastly different languages, each with 
 __ActiveRecord::Base__ (aka "ActiveRecord") is the M in MVC. It's name come from the design pattern called __active record pattern__ which was outlined by  
 Martin Fowler before Rails existed in 2003. It specifies that database tables or views are wrapped into a class. Thus, an object instance is tied to a single row in the table. ActiveRecord (in PascalCase) is the Rails implementation of the active record pattern. The ActiveRecord class facilities the creation of objects which are tied to our database and allows us to extend a static database to have business logic, processed within our application code. In this way, ActiveRecord not only preforms CRUD on the database, it makes it intelligent.  
 
-Remember that each model names matches a table name. Also note that a model is really just a Ruby class. ActiveRecord lets us create a new row in the table by  
-instantiating an object from the model's class  
+Remember that each model names matches a table name. Also note that a model is really just a Ruby class. ActiveRecord lets us create a new row in the table by instantiating an object from the model's class  
 
 	DATABASE    RAILS                       Example
 	
@@ -446,8 +432,7 @@ Note that Rails was smart enough to know the second call to the save method shou
 
 When we use `generate model User`, our user.rb file has boilerplate code with a class inheriting from `ActiveRecord::Base`, making it an __"ActiveRecord Model"__. This makes our model database-ready. You could also create a model file manually if you don't want a matching database migration file. In this case you would not need the `< ActiveRecord::Base` inheritance in your model file. But be aware that the inheritance gives us a lot. Without it we will be missing all the attribute accessors corresponding to data on the database and would have to put them all in one by one. If you have a table with 75 columns this is a lot of work. Rails will invisibly add and update all of this behind the scenes if we follow Rails conventions.  
 
-__ActiveRecord::Relation__ (aka "Active Relation" or "ARel") was added in Rails version 3. The line between ActiveRecord and Active Relation is a bit blurred.  
-Many things you do in ActiveRecord::Base actually rely heavily on ActiveRecord::Relation. ARel uses relational algebra to simplify the generation of complex database queries. Small queries can be chained like we see in Ruby objects. ARel is used for things like joins and aggregations, using efficient SQL and timed executions which wait until the actual query is needed.  
+__ActiveRecord::Relation__ (aka "Active Relation" or "ARel") was added in Rails version 3. The line between ActiveRecord and Active Relation is a bit blurred. Many things you do in ActiveRecord::Base actually rely heavily on ActiveRecord::Relation. ARel uses relational algebra to simplify the generation of complex database queries. Small queries can be chained like we see in Ruby objects. ARel is used for things like joins and aggregations, using efficient SQL and timed executions which wait until the actual query is needed.  
 ________________________________________________________________________________
 # Migration Basics
 ________________________________________________________________________________
@@ -615,7 +600,7 @@ ________________________________________________________________________________
 Within our migration files we have various methods available to us in addition to `create_table` and `drop_table` which we have already seen:
 
 TABLE METHODS:
-	
+
 	create_table( table, options ) { |t| ...columns... }
 	
 	drop_table( table )
@@ -623,7 +608,7 @@ TABLE METHODS:
 	rename_table( table, new_name )  
 
 NOTE: The two args for `rename_table`, if placed in a `change` definition, NOT `up` or `down`, are reversed by Rails if you undo the migration in the command line. If you have this method inside and `up` method then you will need to swap the args manually in the `down` method.  
-	
+
 
 COLUMN METHODS:
 
@@ -643,8 +628,7 @@ INDEX METHODS:
 	
 	remove_index (table, column)
 
-In the above, `column` can be an array of column names. Also note that `options`  
-can be  
+In the above, `column` can be an array of column names. Also note that `options` can be  
 
 	:unique => true/false
 	
@@ -962,7 +946,6 @@ If you look at `new_courses[1]` you will see `#<Course id: 38, name: "test1">` Y
 		| 38 | test1 |             | 2016-04-11 02:05 | 2016-04-11 02:05 |
 		+----+-------+-------------+------------------+------------------+
 
-
 ________________________________________________________________________________
 ## Find and other Simple Queries
 
@@ -986,7 +969,7 @@ By saying they "return the row" we really mean an object from the class `Teacher
 	> teach_id1.class.superclass  # => ActiveRecord::Base  
 	> teach_id1.new_record?       # returns false because teacher it already existed
 
-	
+
 If we created a new object with the `new` method (not by grabbing one from the database) `.new_record` would return `true`.  
 
 Each column name in a table is also a data attribute available on objects pertaining to the table.
@@ -1234,11 +1217,6 @@ For a SQL-like format, you can use the hirb gem by cldwalker:
 
 Much easier to read!  
 
-DOES NOT WORK### Viewing the Entire DB in Console
-DOES NOT WORK
-DOES NOT WORK	> Rails.application.eager_load! # required on dev env to load everything
-DOES NOT WORK	> ar = ActiveRecord::Base.descendants # array of all: Classroom, Teacher, etc.
-DOES NOT WORK	> ar.each_index { |i| m = eval "#{ar[i].name}"; eval "#{m}.all" }
 ________________________________________________________________________________
 # Associations
 ________________________________________________________________________________
@@ -1286,7 +1264,7 @@ are some things things to adhere to:
 * The `belongs_to` side should have the foreign key
 * The method declarations should be in the model class, often at the top  
 
-__What Do They Do? THIS ALL MIGHT BE BOGUS INFO__
+__What Do They Do? THIS ALL MIGHT BE BOGUS INFO__ DELETE?
 
 One concept that is important to understand is that the __inclusion of association methods in the Model classes has no direct effect on the database's schema__. It does not change anything about what happens when you run the migrations because does not effect the schema. For this reason, you can run the migrations before adding the association methods to the Models if you choose.  
 
@@ -1486,7 +1464,7 @@ The method name for the model that `has_many` is now plural and it's:
 * new append operator `<<` pushes one object ( `<< obj1 `)
   * assignment `<<` adds to previous associations
 * chain with: `object.others.delete(obj1)` to remove association with obj1
-* chain with: `object.others.destroy(obj1)` to destroy obj2 completely __(NEEDS JOIN?)__
+* chain with: `object.others.destroy(obj1)` to destroy obj1 completely 
 * chain with: `object.others.clear` to remove all associations
 * chain with: `object.others.size` to return number of associated records
 * chain with: `object.others.empty?` returns `true` if there aren't any  
@@ -1638,7 +1616,6 @@ Now we need to create three things: the two foreign keys, which are integer id's
 	end
 
 Notice that the second argument for `add_index` is now an array since we are dealing with two id's. This migration file is now complete and we can run `$ rake db:migrate` to create the join table.  
-
 
 Note that at this point, no SQL JOIN clause has been run. We simply have a table with two id's and an index.   
 
@@ -1917,7 +1894,7 @@ Remember that the methods in Rails controllers are called "actions" and each usu
 ![missing image](https://s3.amazonaws.com/files.jeffruss.com/img/crud_actions.png)
 
 In terms of what actually happens on the web, the __"HTTP Verb"__ are the only thing that actually exists. They keywords that are actually part of the HTTP response and request messages. The actions are, of course, the names of the methods in the Rails controller classes. THe CRUD operations are really just abstract categories for the HTTP Verbs and the Rails actions basically  
-add views, which are GET requests, to each of the CRUD operations. In this way:  
+add views, which are `GET` requests, to each of the CRUD operations. In this way:  
 
 CRUD __create__ == HTTP __POST__ == Rails __create__  
 CRUD __read__ == HTTP __GET__ == Rails __show__   
@@ -1926,14 +1903,14 @@ CRUD __delete__ == HTTP __DELETE__ == Rails __destroy__
 
 They only odd one here is that we have `destroy` where we expected `delete`. `delete` is actually used to display the delete form, a view/GET. This is because ActiveRecord has a `delete` method and a `destroy` method but, as was pointed out earlier, `delete` has issues and `destroy` is preferred. The action name `destroy` is meant to match this ActiveRecord method. In practice, you won't see the Rails `delete` action very often and if you do, it will be for form display (GET) purposes and not for the calling of `delete`.  
  
-All of the CRUD operations have a corresponding Rails action that is GET request.   
+All of the CRUD operations have a corresponding Rails action that is `GET` request.   
 
 Rails adds the GET action/view __new__ for CRUD __create__  
 Rails adds the GET action/view __index__ for CRUD __read__  
 Rails adds the GET action/view __edit__ for CRUD __update__    
 Rails adds the GET action/view __delete__ for CRUD __delete__   
 
-All of these are meant to display a form before modification takes place, with the exceptions of CRUD "__read__", which is already a GET request so Rails breaks it down in to the actions __index__ to show all records and __show__ to show a single one.  
+All of these are meant to display a form before modification takes place, with the exceptions of CRUD "__read__", which is already a `GET` request so Rails breaks it down in to the actions __index__ to show all records and __show__ to show a single one.  
 
 A frequent practice is to place the standard CRUD actions in each controller in the following order: `index`, `show`, `new`, `edit`, `create`, `update` and `destroy` (omitting `delete`). You don't have to follow this order but since they are public methods they must be placed before private or protected method in the controller in order to work.  
 
@@ -1961,13 +1938,13 @@ Notice we didn't type `TeachersController` even though that is what results. Als
 	  before_action :set_teacher, only: [:show, :edit, :update, :destroy]
 	
 	  # GET /teachers
-	  # GET /teachers.JSON
+	  # GET /teachers.json
 	  def index
 	    @teachers = Teacher.all
 	  end
 	
 	  # GET /teachers/1
-	  # GET /teachers/1.JSON
+	  # GET /teachers/1.json
 	  def show
 	  end
 	
@@ -1981,42 +1958,42 @@ Notice we didn't type `TeachersController` even though that is what results. Als
 	  end
 	
 	  # POST /teachers
-	  # POST /teachers.JSON
+	  # POST /teachers.json
 	  def create
 	    @teacher = Teacher.new(teacher_params)
 	
 	    respond_to do |format|
 	      if @teacher.save
 	        format.html { redirect_to @teacher, notice: 'Teacher was successfully created.' }
-	        format.JSON { render :show, status: :created, location: @teacher }
+	        format.json { render :show, status: :created, location: @teacher }
 	      else
 	        format.html { render :new }
-	        format.JSON { render JSON: @teacher.errors, status: :unprocessable_entity }
+	        format.json { render JSON: @teacher.errors, status: :unprocessable_entity }
 	      end
 	    end
 	  end
 	
 	  # PATCH/PUT /teachers/1
-	  # PATCH/PUT /teachers/1.JSON
+	  # PATCH/PUT /teachers/1.json
 	  def update
 	    respond_to do |format|
 	      if @teacher.update(teacher_params)
 	        format.html { redirect_to @teacher, notice: 'Teacher was successfully updated.' }
-	        format.JSON { render :show, status: :ok, location: @teacher }
+	        format.json { render :show, status: :ok, location: @teacher }
 	      else
 	        format.html { render :edit }
-	        format.JSON { render JSON: @teacher.errors, status: :unprocessable_entity }
+	        format.json { render JSON: @teacher.errors, status: :unprocessable_entity }
 	      end
 	    end
 	  end
 	
 	  # DELETE /teachers/1
-	  # DELETE /teachers/1.JSON
+	  # DELETE /teachers/1.json
 	  def destroy
 	    @teacher.destroy
 	    respond_to do |format|
 	      format.html { redirect_to teachers_url, notice: 'Teacher was successfully destroyed.' }
-	      format.JSON { head :no_content }
+	      format.json { head :no_content }
 	    end
 	  end
 	
@@ -2040,7 +2017,7 @@ The primary duties carried out in CRUD method definitions are:
 >* Getting back `@instance_variables` from the erb view files and saving them to the db
 >* Implementing error handing around the saving of records, with a course of action if failed  
 
-It's important to realize that __not all actions have views__. In other words, not all HTTP interactions are GET requests, some are responses from the client. When a user fills out a form and hits submit, the server is not directly asked to "get" anything. It's expected to process the response and THEN possibly provide the user with a fresh view or notice of some sort. When Rails get's a response, it still goes to an action sitting in a controller only it's one meant for handling a response. The difference is that after this action processes the response it might have multiple possible conclusions i.e. a redirect to a "success page" or, in the case of problem, a redirect back to the form, asking the user to fill it out again.  
+It's important to realize that __not all actions have views__. In other words, not all HTTP interactions are `GET` requests, some are responses from the client. When a user fills out a form and hits submit, the server is not directly asked to "get" anything. It's expected to process the response and THEN possibly provide the user with a fresh view or notice of some sort. When Rails GET's a response, it still goes to an action sitting in a controller only it's one meant for handling a response. The difference is that after this action processes the response it might have multiple possible conclusions i.e. a redirect to a "success page" or, in the case of problem, a redirect back to the form, asking the user to fill it out again.  
 
 You can see from our generated controller that there is code outside of any method defintion at the top of our controller class. These are called __BEFORE ACTIONS__ and are provide some other important features to the methods. They used to be called `before_filter`s, which is perhaps more telling: they are used to filter (limit) the interaction with the database based on some variable such as which user is logged in or some other aspect of their record in the database. For example, `before_action` could be used to not include certain elements on the page which are only provided to teachers, such as the ability to edit a biography.      
 
@@ -2099,11 +2076,11 @@ run `rake routes` and see:
 	  root GET      /                                      pages#home
 	       GET|POST /:controller(/:action(/:id))(.:format) :controller#:action
 
-This means that for any action there is a valid route for both a GET request and a POST request. If you refer back to the CRUD chart you'll see that only some actions have POST requests. Also, some have POST but no GET and some have other verbs altogether!  
+This means that for any action there is a valid route for both a `GET` request and a `POST` request. If you refer back to the CRUD chart you'll see that only some actions have `POST` requests. Also, some have POST but no GET and some have other verbs altogether!  
 
-Although there is a more taylored solution which would be to use the `resources` method as we will see next, using default routes can still work. The actual HTTP verb being sent is really just a formality, Rails can process any request anyway it likes. Rails can use the URL and "query string parameters" (the stuff in the URL after `/?`) to determine which action to trigger and the action can perform the duties of any CRUD operation.  
+Although there is a more tailored solution which would be to use the `resources` method as we will see next, using default routes can still work. The actual HTTP verb being sent is really just a formality, Rails can process any request anyway it likes. Rails can use the URL and "query string parameters" (the stuff in the URL after `/?`) to determine which action to trigger and the action can perform the duties of any CRUD operation.  
 
-In fact, most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates. HTML forms (up to HTML version 4 and XHTML 1) only support GET and POST as HTTP request methods and the usual way around this is to funnel all reaquest through those two and have the server interpret what to do based on hidden form fields, which is what Rails does.  
+In fact, most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates. HTML forms (up to HTML version 4 and XHTML 1) only support GET and POST as HTTP request methods and the usual way around this is to funnel all request through those two and have the server interpret what to do based on hidden form fields, which is what Rails does.  
 
 You will need both `:get` and `:post` so if you have them in your `match` route, the rest can be worked around.   
 
@@ -2127,7 +2104,7 @@ And run `$ rake routes`. You'll see:
 
 This is probably what you would want to see if you just defined each route manually. You might wonder what use this is if HTML forms only support GET and POST as HTTP request methods. GET, POST, PUT and DELETE are supported by the implementations of XMLHttpRequest (i.e. AJAX calls) in all the major web browsers (IE, Firefox, Safari, Chrome, Opera).  
 
-Using proper verbs in Rails with `.resources` is part of what is called __RESTful Routes__, which is a design concept that inforces different behaviors for the different the different operations rather than crudely lumping them together into either __GET__ and __POST__. Even though HTTP doesn't exactly support the verbs that make __RESTful Routes__ possible, Rails works around this hoping that one day the standard will be improved. The topic of __RESTful Routes__ is a complicated one and we should set it aside for now and just use just use:  
+Using proper verbs in Rails with `.resources` is part of what is called __RESTful Routes__, which is a design concept that enforces different behaviors for the different the different operations rather than crudely lumping them together into either `GET` and `POST`. Even though HTTP doesn't exactly support the verbs that make __RESTful Routes__ possible, Rails works around this hoping that one day the standard will be improved. The topic of __RESTful Routes__ is a complicated one and we should set it aside for now and just use just use:  
 
     match ':controller(/:action(/:id))', :via => [:get, :post]
 
@@ -2135,7 +2112,7 @@ ________________________________________________________________________________
 # CRUD R: Index & Show
 ________________________________________________________________________________
 
-Here we will look at the two action that pertain to the __R__ (read) in __CRUD__: `index` and `show`. These are both GET requests which means that have views. There are two other actions that are GET requests with views: `edit` and `new` but these are essentially form preperations for a modification of the database so we won't look at them in this chapter. They will be addressed in the next chapter, __CRUD Write Actions__.  
+Here we will look at the two action that pertain to the __R__ (read) in __CRUD__: `index` and `show`. These are both `GET` requests which means that have views. There are two other actions that are `GET` requests with views: `edit` and `new` but these are essentially form preparations for a modification of the database so we won't look at them in this chapter. They will be addressed in the next chapter, __CRUD Write Actions__.  
 
 ________________________________________________________________________________
 ## CRUD R: Index - Action & View
@@ -2154,7 +2131,7 @@ Let's make the index variable for all classrooms in our index method:
 
 The alternative you see in there just gives us some nice alphabetical output to the view. This is useful if the rows where added to the database in a somehow random order and we want to force the sorting. As we saw in the __Custom Queries with Named Scopes__ section, we could have defined this in the Model with:  
 
-	scope :sorted, lamba { order("teacher.last_name ASC") }
+	scope :sorted, lambda { order("teacher.last_name ASC") }
 	
 Which means instead of `@teachers = Teacher.order("last_name ASC")` in the action, we can just put:  
 
@@ -2208,7 +2185,7 @@ Note that `teacher.classroom.lab_equip ? 'yes' : 'no'` is a ternary operator sho
 >* If there are a lot of rows in the database table:
 	* Search functionality  
 	* Pagination     
-	* Sortablability  
+	* Sortability  
 
 Let's actually prepare those links with a placeholder in our view since we will next move on to defining the other actions. Here is the full contents of the file:  
 
@@ -2234,7 +2211,7 @@ Let's actually prepare those links with a placeholder in our view since we will 
 ________________________________________________________________________________
 ## A Brief Note on erb and link_to
 
-Note that we used Ruby's `+` string concatination operator just to make them one line of HTML without this monstrosity:  
+Note that we used Ruby's `+` string concatenation operator just to make them one line of HTML without this monstrosity:  
 
 	<%= link_to("Show ", '#') %><%= link_to("Edit ", '#') %><%= link_to("Delete", '#') %>
 	
@@ -2242,7 +2219,7 @@ You might wonder why you can't just do this:
 
 	<%= link_to("Show ", '#'); link_to("Edit ", '#'); link_to("Delete", '#') %>
 
-and the answer is that __each `<%= %>` element has only one output: the return from the last statement!__ Plain Ruby can have multiple method calls in a single statement, concatinating them all together into one return with the `+` operator like `str = method("arg") + method("arg") + method("arg")` so why not __erb__?  
+and the answer is that __each `<%= %>` element has only one output: the return from the last statement!__ Plain Ruby can have multiple method calls in a single statement, concatenating them all together into one return with the `+` operator like `str = method("arg") + method("arg") + method("arg")` so why not __erb__?  
 
 Anyway, all of this is just academic since this is a placeholder for now and will be multiple lines soon, but it's good to know that `<%= %>` only has one output and that `+` can be used to circumvent this.  
 
@@ -2252,9 +2229,9 @@ If you wanted a link to `/teachers/new` you could used `link_to("New Teacher", n
 
 __When you are dealing with CRUD actions, only those with__ `GET` __verbs have a__ `_path` __available for them.__ They are essentially paths used by Rails for modifying server-side data. They still have URL's but you'll never see them in Google search results, for example. They only make sense in the context of having just entered data in a page, having that data sent to them.  
 
-Even some of the viewable pages need additional information in their GET requests. A URL can be used by one user to view their record in the database table whereas another use will visit the same URL and see another record from the same table. This can be controlled by more elements in your hash with, like `{action: 'new', id: 5}`.  
+Even some of the viewable pages need additional information in their `GET` requests. A URL can be used by one user to view their record in the database table whereas another use will visit the same URL and see another record from the same table. This can be controlled by more elements in your hash with, like `{action: 'new', id: 5}`.  
  
-When you are dealing with views belonging to CRUD action, you'll likely aways use hash syntax rather than `_path` even for links with `GET`, just to keep things consistant.  
+When you are dealing with views belonging to CRUD action, you'll likely aways use hash syntax rather than `_path` even for links with `GET`, just to keep things consistent.  
 ________________________________________________________________________________
 ## CRUD R: Show - Action & View
 
@@ -2305,7 +2282,7 @@ That's all we need since a teacher with `id == 3` definitely exists since we _ju
 	    <td><%= t.updated_at %></td>
 	  </tr>
 
-Note that `button_to` actually generates a form around it, which defaults to a `POST` request so we had to bypass that with the third argument option. There is in fact any number of courses per teacher/room pair so we will need to iterate over that using the same instance variable but in the form `@teacher.courses` Take a look at the tables in schema.rb to get an idea of what table headers we'll want. We could actually have an interator for students enrolled conatained within each iteration of a new course. Here is a mock-up of plain Ruby:  
+Note that `button_to` actually generates a form around it, which defaults to a `POST` request so we had to bypass that with the third argument option. There is in fact any number of courses per teacher/room pair so we will need to iterate over that using the same instance variable but in the form `@teacher.courses` Take a look at the tables in schema.rb to get an idea of what table headers we'll want. We could actually have an iterator for students enrolled contained within each iteration of a new course. Here is a mock-up of plain Ruby:  
 
 	<% @teacher.courses.each.with_index(1) do |c, i| %>
 	<table border="1">
@@ -2347,7 +2324,7 @@ Note that `button_to` actually generates a form around it, which defaults to a `
 
 Now, in between of the `<!-- enrolled students section -->`, let's use the `c` variable in to iterated over the student each time `c` changes to a new course in the outer iterator. We'll stayed within the same HTML table in this nested iterator and justed add a wide, `colspan="4"` row to label the "Students Enrolled" portion of the table.  
 
-Now we have a choice: we can access the student's data via `Course.enrollments.each` or `Course.students.each` (since we added the "`has_many :students, through: :enrollments`" to `Course`). Both have limitiation.  
+Now we have a choice: we can access the student's data via `Course.enrollments.each` or `Course.students.each` (since we added the "`has_many :students, through: :enrollments`" to `Course`). Both have limitation.  
 
 * __OPTION A:__ The `c.enrollments.each do |e|` rows lack the `first_name` and `last_name` columns which makes sense because it would not specify which student is being referred to. This data is only only available via `Student`. We would have to:  
 >  
@@ -2358,10 +2335,10 @@ Now we have a choice: we can access the student's data via `Course.enrollments.e
 * __OPTION B:__ The `c.students.each do |s|` rows lack the `grade` and `elective` columns which makes sense because it would not specify which course is being referred to. This data is only only available via the `enrollments` table. We would have to:  
 >  
   * query the course row from the outer loop to get the course_id. Then use it to  
-  * query the current student's "`s` enrollments using with student id as a foriegn key
+  * query the current student's "`s` enrollments using with student id as a foreign key
   * For example: `s.enrollments.where(course_id: c.id).first` (without `.first` we get a 1 element array)
 
-Back to our choices, note that it's better to perform the query seen in the `.find()` arguments once and store it, rather than reperforming it multiple times. This would speed up both options. Option A needs a new value for `student_id` with every iteration of the nested loop whereas Option B uses the same `course_id` for the each entire run. In other words, Option B can have the query outside of the loop. This involves less queries so we'll use that.
+Back to our choices, note that it's better to perform the query seen in the `.find()` arguments once and store it, rather than re-performing it multiple times. This would speed up both options. Option A needs a new value for `student_id` with every iteration of the nested loop whereas Option B uses the same `course_id` for the each entire run. In other words, Option B can have the query outside of the loop. This involves less queries so we'll use that.
 
 
 	    <% c_id = c.id %>
@@ -2446,7 +2423,7 @@ What use it a page without a link to it? Add this somewhere in `teachers/index.h
 
 	<%= link_to( "Add new Teacher", {action: 'new'} ) %>
 	
-The `teacher/new.html.erb` file will basically be a form to enter data for a new teacher record with a submit button that sends a __POST__ request to `teachers#create` together with the data provided in the form. You may already be familiar with HTML forms but we need to address how they interact with your Rails CRUD actions.  
+The `teacher/new.html.erb` file will basically be a form to enter data for a new teacher record with a submit button that sends a `POST` request to `teachers#create` together with the data provided in the form. You may already be familiar with HTML forms but we need to address how they interact with your Rails CRUD actions.  
 
 You could create traditional forms in HTML but Rails provides "helpers" that can be used view templates that render Ruby code to normal HTML forms. There are several benefits to using the helpers over writing HTML forms directly as we will see in this section.  
 
@@ -2461,9 +2438,9 @@ First let's put a plain HTML forms in `teacher/new.html.erb`:
 	  
 	</form>
 
-When the user hits submit, a POST request is sent to the `/teachers` URL, not `/teachers/create`. If you look at `$ rake routes`, you'll see that that when `/teachers` gets a POST request, the `teachers#create` action is triggered. There are in fact many listings of the `/teachers` URL: Rail will know which action to call based on the HTTP VERB received.  
+When the user hits submit, a `POST` request is sent to the `/teachers` URL, not `/teachers/create`. If you look at `$ rake routes`, you'll see that that when `/teachers` gets a `POST` request, the `teachers#create` action is triggered. There are in fact many listings of the `/teachers` URL: Rail will know which action to call based on the HTTP VERB received.  
 
-After Rails get's the POST from the form submission, the values entered into the input fields will be available in the `TeachersController`'s `create` method via the params hash with the following keys:   
+After Rails GET's the POST from the form submission, the values entered into the input fields will be available in the `TeachersController`'s `create` method via the params hash with the following keys:   
 
 > `params[:first_name]` and `params[:first_name]`  
 
@@ -2509,7 +2486,7 @@ The `text_field_tag` takes a second argument for this `value` attribute. However
 	<%= text_field(:teacher, :first_name) %>
 	<%= text_field(:teacher, :last_name) %>
 
-This won't yeild anything different in the resulting HTML just now since we haven't provided an object from the view's controller but we will in the next section.  
+This won't yield anything different in the resulting HTML just now since we haven't provided an object from the view's controller but we will in the next section.  
 
 All of the above is fine but there is an even better way, and this is the typical way you will see forms in Rails:  
 
@@ -2529,7 +2506,7 @@ Most of the time you will probably use `form_for`. Even if you have one field pe
 ________________________________________________________________________________
 ## CRUD C: New - Action
 
-The form sitting in the new tamplate didn't really need anything from it's controller: it's not relying on the context of any one record since it's meant for creating a new one. How ever, we miss out on having default values for the form without creating a new, empty teacher object as an instance variable like this:  
+The form sitting in the new template didn't really need anything from it's controller: it's not relying on the context of any one record since it's meant for creating a new one. How ever, we miss out on having default values for the form without creating a new, empty teacher object as an instance variable like this:  
 
 	def new
 	  @teacher = Teacher.new
@@ -2616,7 +2593,7 @@ But we're really only interested in `:teacher` which is actually another hash wi
 	params[:teacher][:first_name] = "John"  
 	params[:teacher][:last_name] = "Doe"
 	
-Thes are the two bits of data we'll actually store to the database, but before we do this we have security concerns as we'll see next.  
+These are the two bits of data we'll actually store to the database, but before we do this we have security concerns as we'll see next.  
 ________________________________________________________________________________
 ## A Brief Note on Strong Parameters
 
@@ -2631,7 +2608,7 @@ The hash within the hash that contains all the form fields can be quite large  a
 
 >> `@teacher.update_attributes(params[:teacher])`
 
-but there are major security issues with these. You may have column in your database not meant to be modified by the user, like `admin: true`. You might not have that in your form but the server can still take a POST request for `teachers` that has that data in the request message. Imaging you have a field to change a password. This seem totally safe but only if the client doesn't have arbitrary control over `user_name: "Somebody Else"`! Mass-assignment take whatever the params hash has a passes it in to the database without filtering.  
+but there are major security issues with these. You may have column in your database not meant to be modified by the user, like `admin: true`. You might not have that in your form but the server can still take a `POST` request for `teachers` that has that data in the request message. Imaging you have a field to change a password. This seem totally safe but only if the client doesn't have arbitrary control over `user_name: "Somebody Else"`! Mass-assignment take whatever the params hash has a passes it in to the database without filtering.  
 
 Rails versions 1 and 2 could declare attributes as "protected" from mass-assignment. This means that everything is allowed by default until you specify otherwise. Too many people ignored this option or simply forgot to use it.  
 
@@ -2639,17 +2616,17 @@ Rails version 3 evolved from using this __blacklisting__ technique to using __wh
 
 Rails version 4 further refined the __whitelisting__ to have __"strong parameters"__ which moved the whitelisting to just the controllers and views.  
 
-__How to use Strong Paramters__  
+__How to use Strong Parameters__  
 
 Whenever we want to whitelist the two attributes of `params[:teacher]` for mass-assignment, we tell the params hash about them like this:   
 
 	params.require(:teacher).permit(:first_name, :last_name)
 	
-Note that the chaning of `.require().permit()` reflected the order of the sub-hash. In other words, if you have `params[:hash][:attribute]` you will chain your whitelisting to reflect that relationship with `params.require(:hash).permit(:attribute)`. It's important to note that this alone:  
+Note that the chaining of `.require().permit()` reflected the order of the sub-hash. In other words, if you have `params[:hash][:attribute]` you will chain your whitelisting to reflect that relationship with `params.require(:hash).permit(:attribute)`. It's important to note that this alone:  
 
 	params.require(:teacher)  
 
-does not whitelist `:first_name` or `:last_name` and in fact it does not whitelist anything, it simply returns the `teacher` hash within `params`, similiar to how referencing `params[:teacher]` would do. So referring back to:  
+does not whitelist `:first_name` or `:last_name` and in fact it does not whitelist anything, it simply returns the `teacher` hash within `params`, similar to how referencing `params[:teacher]` would do. So referring back to:  
 
 	params.require(:teacher).permit(:first_name, :last_name)
 
@@ -2736,8 +2713,8 @@ Here is the final state of what we added. Note that __the private method must be
 	      # success! send user to teacher index:
 	      redirect_to(action: 'index')
 	    else
-	      # falure. send user back to form.
-	      # (where @teacher can prepopulate)
+	      # failure. send user back to form.
+	      # (where @teacher can pre-populate)
 	      render('new')
 	    end
 	  end
@@ -2759,7 +2736,7 @@ If you tested your site by filing out the form and hitting submit you probably g
 	
 	undefined method `room_num' for nil:NilClass
 
-This does not mean your new record was not added to the database. What this means the teacher you created does not have an assocation with a classroom defined, since we didn't put it in the form. The new teacher DOES have a `.classroom` method but it does not have `.classroom.room_number` or any other classroom attribute. The teacher's object has `nil` return when `.classroom` is called on it and we can use this as a test in our view template to decide what to do with teachers without classrooms. These two lines are now errors but we don't even get past the first one.  
+This does not mean your new record was not added to the database. What this means the teacher you created does not have an association with a classroom defined, since we didn't put it in the form. The new teacher DOES have a `.classroom` method but it does not have `.classroom.room_number` or any other classroom attribute. The teacher's object has `nil` return when `.classroom` is called on it and we can use this as a test in our view template to decide what to do with teachers without classrooms. These two lines are now errors but we don't even get past the first one.  
 
 	    <td><%= teacher.classroom.room_num %></td>
 	    <td><%= teacher.classroom.lab_equip ? 'yes' : 'no' %></td>
@@ -2791,7 +2768,7 @@ ________________________________________________________________________________
 ## CRUD U: Edit  
 
 
-First we need a link to our edit teacher page, probably from `/teachers` (`teachers#index`) since we already have a placeholder there. This link will need to send the teacher `id` with the POST request. Here it is, together with the other links just to give it some context:  
+First we need a link to our edit teacher page, probably from `/teachers` (`teachers#index`) since we already have a placeholder there. This link will need to send the teacher `id` with the `POST` request. Here it is, together with the other links just to give it some context:  
 	
       <%= link_to("Show ", {action: 'show', id: teacher.id}) %>
       <%= link_to("Edit ", {action: 'edit', id: teacher.id}) %>
@@ -2849,9 +2826,9 @@ ________________________________________________________________________________
 # CRUD D: Delete & Destroy
 ________________________________________________________________________________
 
-By now you are probably accustomed to the way Rails will split up a CRUD operation into two: action+form w/ a submit button sending to an action (without a view) to save the change and then direct the user somewhere else. Other than __R__ead, this has be how things operate and CRUD's __D__elete will be similar. You might wonder why you need a form to delete a record. In practice, you will usually use the "form" part of the pair as a confirmation or warning, or you might omit it altogether, perhaps using some JavaScript notice or modal window to act as a confirmation dialog box.  
+By now you are probably accustomed to the way Rails will split up a CRUD operation into two: action + form w/ a submit button sending to an action (without a view) to save the change and then direct the user somewhere else. Other than __R__ead, this has be how things operate and CRUD's __D__elete will be similar. You might wonder why you need a form to delete a record. In practice, you will usually use the "form" part of the pair as a confirmation or warning, or you might omit it altogether, perhaps using some JavaScript notice or modal window to act as a confirmation dialog box.  
 
-This gets back to the point of forms only supporting GET and POST requests. CRUD "D" is supposed to use the DELETE verb but, as was stated earlier, that is not supported in most HTML forms. Having the DELETE verb attached to a route CAN be used for JavaScript AJAX. Remember we said:  
+This gets back to the point of forms only supporting GET and `POST` requests. CRUD "D" is supposed to use the DELETE verb but, as was stated earlier, that is not supported in most HTML forms. Having the DELETE verb attached to a route CAN be used for JavaScript AJAX. Remember we said:  
 
 > __GET, POST, PUT and DELETE are supported by the implementations of XMLHttpRequest (i.e. AJAX calls) in all the major web browsers (IE, Firefox, Safari, Chrome, Opera).__  
 
@@ -2907,7 +2884,7 @@ There is more we can do to make this page look nicer but it requires a bit of kn
 ________________________________________________________________________________
 ## Use/Abuse of Links, Buttons, and Verbs
 	
-__IMPORTANT!__ All form actually place an HTTP POST request when the submit button is pressed. Remember we said that most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates? Well, here, POST will be used instead of DELETE for that reason. This also means that we have a difference in our routes between those generated from "default routes" vs `resources` that really matters here. If we used the latter, the `destroy` action is expecting a `DELETE` verb, which we are not giving it here. Therefore, the above will not work with `resources :teachers` but will work with:  
+__IMPORTANT!__ All form actually place an HTTP `POST` request when the submit button is pressed. Remember we said that most browsers don't actually support the DELETE verb, so Rails fakes it by modifying the HTML it generates? Well, here, POST will be used instead of DELETE for that reason. This also means that we have a difference in our routes between those generated from "default routes" vs `resources` that really matters here. If we used the latter, the `destroy` action is expecting a `DELETE` verb, which we are not giving it here. Therefore, the above will not work with `resources :teachers` but will work with:  
 
 	  match ':controller(/:action(/:id))', :via => [:get, :post]
 	
@@ -2915,7 +2892,7 @@ This is quite the trap for the user since we have no way to abort the `destroy` 
 
 	<%= button_to "Cancel", {action: "index"}, {method: :get} %>
 	
-Remember that this syntax is a sort of cheat to make a button_to work with a get request when they are really meant only for post requests.  
+Remember that this syntax is a sort of cheat to make a button_to work with a `GET` request when they are really meant only for `POST` requests.  
 
 We could have some sort of cancel button to the left of "Delete Teacher" but the whole premise of having a form with editable `text_field`s is already questionable since all we need to do is display information. First let's downgrade from `form_for` to `form_tag` since we don't really need `f`:  
 
@@ -2930,7 +2907,7 @@ We could have some sort of cancel button to the left of "Delete Teacher" but the
 	  <%= submit_tag("Delete Teacher")  %>
 	<% end %>
 	
-It's hardly a form but our submit button would not function as we expect without the form, using `button_to` so we have the form there for that reason. Since we've abused the `button_to` helper to work for a GET request we might as well demonstrate it's proper use in a POST request. Unlike the __Cancel__ button, we don't need a third arguments since we are not overriding it's normal behavior. We do, however, need to specify the `:id` which will will put in the expanded version of the second argument, revealing that it is in fact a hash:  
+It's hardly a form but our submit button would not function as we expect without the form, using `button_to` so we have the form there for that reason. Since we've abused the `button_to` helper to work for a `GET` request we might as well demonstrate it's proper use in a `POST` request. Unlike the __Cancel__ button, we don't need a third arguments since we are not overriding it's normal behavior. We do, however, need to specify the `:id` which will will put in the expanded version of the second argument, revealing that it is in fact a hash:  
 
 	<h1>Delete Teacher</h1>
 	<h2>
@@ -2945,17 +2922,17 @@ But wouldn't it be nice if the two buttons were side by side? They are not becau
 
 	<button><a href="/teachers"</a></button>
 
-and then unstyling the anchor. We could do this like:  
+and then un-styling the anchor. We could do this like:  
 
 	<button>
 	  <%= link_to "Cancel", {action: "index"}, style: 'text-decoration: none;' %>
 	</button>
 
-But the submit button is still inside a form. If you think about it, it really doesn't matter what HTML verbs are sent so long as Rails knows what to do. We already have every action accepting both GET and POST requests because of this:
+But the submit button is still inside a form. If you think about it, it really doesn't matter what HTML verbs are sent so long as Rails knows what to do. We already have every action accepting both GET and `POST` requests because of this:
 
 	match ':controller(/:action(/:id))', :via => [:get, :post]
 
-So why not just send a post request to `/teachers/destroy/3` to destroy teacher with and `id` of `3`? This actually works just fine, so long as we use the `match` route:  
+So why not just send a `POST` request to `/teachers/destroy/3` to destroy teacher with and `id` of `3`? This actually works just fine, so long as we use the `match` route:  
 
 	<button><%= link_to "Cancel", {action: "index"} %></button>
 	<button>
@@ -2972,7 +2949,7 @@ and the buttons are side by side.
 ________________________________________________________________________________
 ## CRUD D: Destroy Action  
 
-The Rails action `destroy` is used to actually carry out the `.destroy` method call on the object, deleting it from the database. It does not have a view file and is meant only to catch the submittion of the request to delete and then redirect the user to the index or somewhere else. Here is how the definition can look:  
+The Rails action `destroy` is used to actually carry out the `.destroy` method call on the object, deleting it from the database. It does not have a view file and is meant only to catch the submission of the request to delete and then redirect the user to the index or somewhere else. Here is how the definition can look:  
 
 	  def destroy
 	    @teacher = Teacher.find(params[:id])
@@ -2990,7 +2967,7 @@ ________________________________________________________________________________
 # The Flash Hash and Client-Side Data  
 ________________________________________________________________________________
 
-The way we have been interacting with the user thus far can not be accepted as good user experience design (UXD) by today's standards. We haven't been confirming the successfull completion of any operation, we've just been shuffling the user around serveral time every time they want to perform an operation. In todays world of single-page web applications we have certainly not made our site be anything like what people expect. This requires a lot of AJAX which is not our focus right now but we should still try to have some confirmation of success, even with a separate page load.  
+The way we have been interacting with the user thus far can not be accepted as good user experience design (UXD) by today's standards. We haven't been confirming the successful completion of any operation, we've just been shuffling the user around several time every time they want to perform an operation. In todays world of single-page web applications we have certainly not made our site be anything like what people expect. This requires a lot of AJAX which is not our focus right now but we should still try to have some confirmation of success, even with a separate page load.  
 
 Each time we redirect the user to the index, the browser basically has no idea what what just happened. The URL is loaded just the same as it would from any user because __HTML is "stateless"__  
 
@@ -3058,7 +3035,7 @@ ________________________________________________________________________________
 # Advanced Forms	
 ________________________________________________________________________________
 
-To review, we had the `form_tag` which can be used with either the `text_field_tag` or `text_field`. `text_field_tag` is not object aware option but could be usefull for things like search boxes.  
+To review, we had the `form_tag` which can be used with either the `text_field_tag` or `text_field`. `text_field_tag` is not object aware option but could be useful for things like search boxes.  
 
 	<%= form_tag(action: 'create') do %>
 	
@@ -3095,13 +3072,9 @@ Here are some more tags helpers:
 	text_area			file_field
 	hidden_field		label
 
-
-
 ________________________________________________________________________________
 # Data Validation	
 ________________________________________________________________________________
-
-
 
 ________________________________________________________________________________
 # User Authentication	
